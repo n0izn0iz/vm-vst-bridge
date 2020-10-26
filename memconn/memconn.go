@@ -1,4 +1,4 @@
-package main
+package memconn
 
 /*
 #include <stdio.h>
@@ -58,41 +58,13 @@ membuf* initShmem(_GoString_ _shmem_device_file, size_t *size, int* err)
 */
 import "C"
 import (
-	"errors"
 	"fmt"
+	"io"
 	"net"
 	"time"
 )
 
 // fixme: add ids to prevent misuse
-
-type Listener struct {
-	shmemPath string
-	ringSize  int
-	offset    int
-	invert    bool
-	accepted  bool
-}
-
-var _ net.Listener = (*Listener)(nil)
-
-func Listen(shmemPath string, ringSize int, offset int, invert bool) *Listener {
-	return &Listener{shmemPath, ringSize, offset, invert, false}
-}
-
-func (l *Listener) Accept() (net.Conn, error) {
-	if l.accepted {
-		return nil, errors.New("memconn already accepted")
-	}
-	l.accepted = true
-	return Connect(l.shmemPath, l.ringSize, l.offset, l.invert), nil
-}
-
-func (l *Listener) Close() error {
-	return nil
-}
-
-func (l *Listener) Addr() net.Addr { return addr{} }
 
 type Conn struct {
 	size         C.size_t
@@ -101,27 +73,12 @@ type Conn struct {
 	writerOffset C.size_t
 	readerIndex  int
 	writerIndex  int
+	done         chan struct{}
 }
 
 var _ net.Conn = (*Conn)(nil)
 
-func Connect(shmemPath string, ringSize int, offset int, invert bool) *Conn {
-	var ret C.int
-	var size C.size_t
-	mem := C.initShmem(shmemPath, &size, &ret)
-	if ret != 0 {
-		panic(fmt.Sprint("failed to init shmem: ret=", ret))
-	}
-	fmt.Println("ivshmem size:", size/1024/1024, "MiB")
-	fmt.Println("ring offset:", offset, "B")
-
-	// FIXME: compute real maximum
-	if C.size_t(ringSize) > (size / 2) {
-		panic("ring too big for ivshmem")
-	}
-	size = C.size_t(ringSize)
-	fmt.Println("ring size:", size, "B")
-
+func Connect(membuf *C.membuf, ringSize int, offset int, invert bool) *Conn {
 	var readerOffset C.size_t
 	var writerOffset C.size_t
 	var readerIndex int
@@ -139,26 +96,32 @@ func Connect(shmemPath string, ringSize int, offset int, invert bool) *Conn {
 	}
 
 	return &Conn{
-		size:         size,
-		membuf:       mem,
+		size:         C.size_t(ringSize),
+		membuf:       membuf,
 		readerOffset: readerOffset,
 		writerOffset: writerOffset,
 		readerIndex:  readerIndex,
 		writerIndex:  writerIndex,
+		done:         make(chan struct{}),
 	}
 }
 
 func (c *Conn) Close() error {
+	fmt.Println("Close called")
+	c.membuf.connected = false
 	return nil // FIXME
 }
 
 func (c *Conn) Read(buf []byte) (int, error) {
-	c.membuf.readIndices[c.readerIndex] = c.membuf.writeIndices[c.readerIndex]
-	//fmt.Println("readIndex: ", c.membuf.readIndices[c.readerIndex])
+	fmt.Println("R______________________")
 
-	//fmt.Println("_______________________")
+	fmt.Println("readIndex: ", c.membuf.readIndices[c.readerIndex])
 	var readUntil C.uint64_t
 	for {
+		if !c.membuf.connected {
+			fmt.Println("not connected")
+			return 0, io.ErrClosedPipe
+		}
 		readUntil = c.membuf.writeIndices[c.readerIndex]
 		if c.membuf.readIndices[c.readerIndex] != readUntil {
 			break
@@ -174,27 +137,35 @@ func (c *Conn) Read(buf []byte) (int, error) {
 	if toRead > C.uint64_t(len(buf)) {
 		toRead = C.uint64_t(len(buf))
 	}
-	//fmt.Println("toRead: ", toRead)
+	fmt.Println("toRead: ", toRead)
 	for i := C.uint64_t(0); i < toRead; i++ {
 		b := C.readByte(c.membuf, c.readerOffset+((c.membuf.readIndices[c.readerIndex]+i)%c.size))
 		buf[i] = byte(b)
 	}
-	//fmt.Println("__")
-	//fmt.Println("Text: ", string(buf))
+	fmt.Println("Data: ", string(buf))
 	c.membuf.readIndices[c.readerIndex] = readUntil
-	//fmt.Println("readIndex: ", c.membuf.readIndices[c.readerIndex])
+	fmt.Println("readIndex: ", c.membuf.readIndices[c.readerIndex])
 
 	return int(toRead), nil
 }
 
 func (c *Conn) Write(data []byte) (int, error) {
-	//fmt.Println("_______________________")
+	fmt.Println("W______________________")
+
+	if !c.membuf.connected {
+		fmt.Println("not connected 2")
+		return 0, io.ErrClosedPipe
+	}
 
 	toWrite := C.uint64_t(len(data))
-	//fmt.Println("toWrite: ", toWrite)
+	fmt.Println("toWrite: ", toWrite)
 	baseIndex := c.membuf.writeIndices[c.writerIndex]
 	for i := C.uint64_t(0); i < toWrite; i++ {
 		for {
+			if !c.membuf.connected {
+				fmt.Println("not connected 3")
+				return 0, io.ErrClosedPipe
+			}
 			writeUntil := c.membuf.readIndices[c.writerIndex]
 			var canWrite C.uint64_t
 			if writeUntil == c.membuf.writeIndices[c.writerIndex] {
@@ -207,19 +178,22 @@ func (c *Conn) Write(data []byte) (int, error) {
 			if canWrite > 0 {
 				break
 			}
-			//fmt.Println("Waiting for read..")
+			fmt.Println("Waiting for read..")
 			time.Sleep(10 * time.Millisecond)
 		}
 		C.writeByte(c.membuf, c.writerOffset+((baseIndex+i)%c.size), C.char(data[i]))
 		c.membuf.writeIndices[c.writerIndex] = (c.membuf.writeIndices[c.writerIndex] + 1) % c.size
 	}
-	//fmt.Println("writeIndex: ", c.membuf.writeIndices[c.writerIndex])
+	fmt.Println("writeIndex: ", c.membuf.writeIndices[c.writerIndex])
 
 	return len(data), nil
 }
 
-func (c *Conn) SetDeadline(time.Time) error {
-	return nil //FIXME
+func (c *Conn) SetDeadline(t time.Time) error {
+	fmt.Println("SetDeadline called with ", t)
+	c.SetReadDeadline(t)
+	c.SetWriteDeadline(t)
+	return nil
 }
 
 func (c *Conn) SetReadDeadline(time.Time) error {
@@ -232,10 +206,3 @@ func (c *Conn) SetWriteDeadline(time.Time) error {
 
 func (l *Conn) LocalAddr() net.Addr  { return addr{} }
 func (l *Conn) RemoteAddr() net.Addr { return addr{} }
-
-type addr struct{}
-
-var _ net.Addr = (*addr)(nil)
-
-func (a addr) Network() string { return "memconn" }
-func (a addr) String() string  { return "memconn" }

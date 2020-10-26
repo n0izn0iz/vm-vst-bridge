@@ -2,13 +2,20 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"flag"
 	"fmt"
+	"math/rand"
 	"net"
 	"os"
+	"time"
+
+	"github.com/n0izn0iz/vm-vst-bridge-host/memconn"
 )
 
 func main() {
+	rand.Seed(time.Now().UnixNano())
+
 	var offset int
 	flag.IntVar(&offset, "offset", 0, "offset of the ring buffer in the ivshmem")
 	var ringSize int
@@ -22,11 +29,19 @@ func main() {
 
 	var conn net.Conn
 	if client {
-		conn = Connect(shmemPath, ringSize, offset, true)
+		dialer := memconn.Dialer(shmemPath, ringSize, offset)
+		var err error
+		conn, err = dialer(context.Background(), "ivshmem")
+		if err != nil {
+			panic(err)
+		}
+		defer conn.Close()
 	} else {
-		lis := Listen(shmemPath, ringSize, offset, false)
+		lis := memconn.Listen(shmemPath, ringSize, offset)
+		defer lis.Close()
 		var err error
 		conn, err = lis.Accept()
+		defer conn.Close()
 		if err != nil {
 			panic(err)
 		}
