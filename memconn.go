@@ -58,6 +58,7 @@ membuf* initShmem(_GoString_ _shmem_device_file, size_t *size, int* err)
 */
 import "C"
 import (
+	"errors"
 	"fmt"
 	"net"
 	"time"
@@ -81,7 +82,7 @@ func Listen(shmemPath string, ringSize int, offset int, invert bool) *Listener {
 
 func (l *Listener) Accept() (net.Conn, error) {
 	if l.accepted {
-		panic("memconn already accepted")
+		return nil, errors.New("memconn already accepted")
 	}
 	l.accepted = true
 	return Connect(l.shmemPath, l.ringSize, l.offset, l.invert), nil
