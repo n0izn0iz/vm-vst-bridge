@@ -61,10 +61,13 @@ import (
 	"fmt"
 	"io"
 	"net"
+	//"runtime/debug"
 	"time"
 )
 
 // fixme: add ids to prevent misuse
+
+type uint64_t = C.uint64_t
 
 type Conn struct {
 	size         C.size_t
@@ -73,7 +76,6 @@ type Conn struct {
 	writerOffset C.size_t
 	readerIndex  int
 	writerIndex  int
-	done         chan struct{}
 }
 
 var _ net.Conn = (*Conn)(nil)
@@ -96,104 +98,107 @@ func Connect(membuf *C.membuf, ringSize int, offset int, invert bool) *Conn {
 	}
 
 	return &Conn{
-		size:         C.size_t(ringSize),
+		size:         C.size_t(ringSize / 2),
 		membuf:       membuf,
 		readerOffset: readerOffset,
 		writerOffset: writerOffset,
 		readerIndex:  readerIndex,
 		writerIndex:  writerIndex,
-		done:         make(chan struct{}),
 	}
 }
 
 func (c *Conn) Close() error {
-	fmt.Println("Close called")
-	c.membuf.connected = false
+	//fmt.Println("Close called", c.readerIndex)
+	//debug.PrintStack()
+	//c.membuf.connected[c.readerIndex] = false
+	c.membuf.connected[c.writerIndex] = false
+	//c.closed = true
 	return nil // FIXME
 }
 
 func (c *Conn) Read(buf []byte) (int, error) {
-	fmt.Println("R______________________")
+	//fmt.Println("R______________________")
 
-	fmt.Println("readIndex: ", c.membuf.readIndices[c.readerIndex])
-	var readUntil C.uint64_t
+	//fmt.Println("readIndex: ", c.membuf.readIndices[c.readerIndex])
+	var index C.uint64_t
+	var toRead C.uint64_t
+	if len(buf) <= 0 {
+		return 0, nil
+	}
 	for {
-		if !c.membuf.connected {
-			fmt.Println("not connected")
+		if !c.membuf.connected[c.writerIndex] && !c.membuf.connected[c.readerIndex] {
 			return 0, io.ErrClosedPipe
 		}
-		readUntil = c.membuf.writeIndices[c.readerIndex]
-		if c.membuf.readIndices[c.readerIndex] != readUntil {
+		if !c.membuf.connected[c.readerIndex] {
+			//fmt.Println("not connected #", c.readerIndex)
+			return 0, io.EOF
+		}
+		index = c.membuf.readIndices[c.readerIndex]
+		toRead = readLen(c.membuf.writeIndices[c.readerIndex], index, c.size)
+		if toRead > 0 {
 			break
 		}
+		//fmt.Println("waiting for write")
 		time.Sleep(10 * time.Millisecond)
 	}
-	var toRead C.uint64_t
-	if c.membuf.readIndices[c.readerIndex] < readUntil {
-		toRead = readUntil - c.membuf.readIndices[c.readerIndex]
-	} else {
-		toRead = readUntil + (c.size - c.membuf.readIndices[c.readerIndex])
-	}
+
 	if toRead > C.uint64_t(len(buf)) {
 		toRead = C.uint64_t(len(buf))
 	}
-	fmt.Println("toRead: ", toRead)
+	//fmt.Println("toRead: ", toRead)
 	for i := C.uint64_t(0); i < toRead; i++ {
-		b := C.readByte(c.membuf, c.readerOffset+((c.membuf.readIndices[c.readerIndex]+i)%c.size))
+		b := C.readByte(c.membuf, c.readerOffset+((index+i)%c.size))
 		buf[i] = byte(b)
 	}
-	fmt.Println("Data: ", string(buf))
-	c.membuf.readIndices[c.readerIndex] = readUntil
-	fmt.Println("readIndex: ", c.membuf.readIndices[c.readerIndex])
+	//fmt.Println("Data: ", string(buf))
+	//fmt.Print(string(buf))
+	c.membuf.readIndices[c.readerIndex] = (index + toRead) % c.size
+	//fmt.Println("readIndex: ", c.membuf.readIndices[c.readerIndex])
 
 	return int(toRead), nil
 }
 
 func (c *Conn) Write(data []byte) (int, error) {
-	fmt.Println("W______________________")
+	//fmt.Println("W______________________")
+	//fmt.Println(">>", string(data))
 
-	if !c.membuf.connected {
-		fmt.Println("not connected 2")
+	if !c.membuf.connected[c.writerIndex] {
+		//fmt.Println("not connected 2")
 		return 0, io.ErrClosedPipe
 	}
 
 	toWrite := C.uint64_t(len(data))
-	fmt.Println("toWrite: ", toWrite)
-	baseIndex := c.membuf.writeIndices[c.writerIndex]
+	//fmt.Println("toWrite: ", toWrite)
 	for i := C.uint64_t(0); i < toWrite; i++ {
+		var index C.uint64_t
 		for {
-			if !c.membuf.connected {
-				fmt.Println("not connected 3")
+			if !c.membuf.connected[c.writerIndex] {
+				//fmt.Println("not connected 3")
 				return 0, io.ErrClosedPipe
 			}
-			writeUntil := c.membuf.readIndices[c.writerIndex]
-			var canWrite C.uint64_t
-			if writeUntil == c.membuf.writeIndices[c.writerIndex] {
-				canWrite = c.size - 1
-			} else if writeUntil < c.membuf.writeIndices[c.writerIndex] {
-				canWrite = (c.size - c.membuf.writeIndices[c.writerIndex]) + writeUntil - 1
-			} else {
-				canWrite = writeUntil - c.membuf.writeIndices[c.writerIndex] - 1
-			}
+			index = c.membuf.writeIndices[c.writerIndex]
+			canWrite := writeLen(index, c.membuf.readIndices[c.writerIndex], c.size)
 			if canWrite > 0 {
 				break
 			}
-			fmt.Println("Waiting for read..")
+			//fmt.Println("waiting for read at", i)
 			time.Sleep(10 * time.Millisecond)
 		}
-		C.writeByte(c.membuf, c.writerOffset+((baseIndex+i)%c.size), C.char(data[i]))
-		c.membuf.writeIndices[c.writerIndex] = (c.membuf.writeIndices[c.writerIndex] + 1) % c.size
+		C.writeByte(c.membuf, c.writerOffset+index, C.char(data[i]))
+		c.membuf.writeIndices[c.writerIndex] = (index + 1) % c.size
 	}
-	fmt.Println("writeIndex: ", c.membuf.writeIndices[c.writerIndex])
+	//fmt.Println("writeIndex: ", c.membuf.writeIndices[c.writerIndex])
 
 	return len(data), nil
 }
 
 func (c *Conn) SetDeadline(t time.Time) error {
-	fmt.Println("SetDeadline called with ", t)
-	c.SetReadDeadline(t)
-	c.SetWriteDeadline(t)
-	return nil
+	//fmt.Println("SetDeadline called with ", t)
+	err := c.SetReadDeadline(t)
+	if err != nil {
+		return err
+	}
+	return c.SetWriteDeadline(t)
 }
 
 func (c *Conn) SetReadDeadline(time.Time) error {
@@ -206,3 +211,29 @@ func (c *Conn) SetWriteDeadline(time.Time) error {
 
 func (l *Conn) LocalAddr() net.Addr  { return addr{} }
 func (l *Conn) RemoteAddr() net.Addr { return addr{} }
+
+func readLen(writeIndex C.uint64_t, readIndex C.uint64_t, size C.size_t) C.uint64_t {
+	if writeIndex >= size || readIndex >= size || size < 2 || size%2 != 0 {
+		panic(fmt.Sprint("invalid arguments, wi:", writeIndex, ", ri:", readIndex, ", size:", size))
+	}
+	if readIndex == writeIndex {
+		return 0
+	} else if readIndex < writeIndex {
+		return writeIndex - readIndex
+	} else {
+		return writeIndex + (size - readIndex)
+	}
+}
+
+func writeLen(writeIndex C.uint64_t, readIndex C.uint64_t, size C.size_t) C.uint64_t {
+	if writeIndex >= size || readIndex >= size || size < 2 || size%2 != 0 {
+		panic(fmt.Sprint("invalid arguments, wi:", writeIndex, ", ri:", readIndex, ", size:", size))
+	}
+	if readIndex == writeIndex {
+		return size - 1
+	} else if readIndex < writeIndex {
+		return (size - writeIndex) + readIndex - 1
+	} else {
+		return readIndex - writeIndex - 1
+	}
+}

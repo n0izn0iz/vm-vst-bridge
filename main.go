@@ -1,17 +1,24 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"flag"
 	"fmt"
 	"math/rand"
-	"net"
-	"os"
 	"time"
 
+	"github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
+	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	"github.com/n0izn0iz/vm-vst-bridge-host/memconn"
+	"go.uber.org/zap"
+	"google.golang.org/grpc"
 )
+
+func unaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+	fmt.Println("info", info)
+	return nil, nil
+}
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
@@ -27,44 +34,25 @@ func main() {
 
 	flag.Parse()
 
-	var conn net.Conn
-	if client {
-		dialer := memconn.Dialer(shmemPath, ringSize, offset)
-		var err error
-		conn, err = dialer(context.Background(), "ivshmem")
-		if err != nil {
-			panic(err)
-		}
-		defer conn.Close()
-	} else {
-		lis := memconn.Listen(shmemPath, ringSize, offset)
-		defer lis.Close()
-		var err error
-		conn, err = lis.Accept()
-		defer conn.Close()
-		if err != nil {
-			panic(err)
-		}
+	lis := memconn.Listen(shmemPath, ringSize, offset)
+	opts := []grpc_zap.Option{
+		grpc_zap.WithLevels(grpc_zap.DefaultCodeToLevel),
+	}
+	logger, _ := zap.NewDevelopment()
+	defer logger.Sync() // flushes buffer, if any
+	logger.Info("wtf")
+	s := grpc.NewServer(grpc_middleware.WithUnaryServerChain(
+		//unaryInterceptor,
+		grpc_ctxtags.UnaryServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)),
+		grpc_zap.UnaryServerInterceptor(logger, opts...),
+	), grpc_middleware.WithStreamServerChain(
+		grpc_ctxtags.StreamServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)),
+		grpc_zap.StreamServerInterceptor(logger, opts...),
+	))
+	RegisterVSTBridgeServer(s, &server{})
+	if err := s.Serve(lis); err != nil {
+		panic(err)
 	}
 
-	go func() {
-		for {
-			buf := make([]byte, 4096)
-			_, err := conn.Read(buf)
-			if err != nil {
-				panic(err)
-			}
-			//fmt.Println("Text: ", string(buf))
-			fmt.Print(string(buf))
-		}
-	}()
-
-	stdinReader := bufio.NewReader(os.Stdin)
-	for {
-		text, _ := stdinReader.ReadString('\n')
-		_, err := conn.Write([]byte(text))
-		if err != nil {
-			panic(err)
-		}
-	}
+	fmt.Println("server done")
 }

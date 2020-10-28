@@ -8,7 +8,7 @@
 typedef struct membuf {
 	uint64_t	challenge;
 	uint64_t	answer;
-	bool			connected;
+	bool			connected[2];
 	uint64_t	readIndices[2];
 	uint64_t	writeIndices[2];
 	char			data;

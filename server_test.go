@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
-	"sync"
 	"testing"
 	"time"
 
@@ -16,33 +15,19 @@ import (
 )
 
 func TestEcho(t *testing.T) {
-	const ringSize = 16
+	const ringSize = 512
 
 	rand.Seed(time.Now().UnixNano())
-
-	lis := memconn.Listen("/dev/shm/ivshmem", ringSize, 0)
-	s := grpc.NewServer()
-	RegisterVSTBridgeServer(s, &server{})
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		if err := s.Serve(lis); err != nil {
-			log.Fatal(err)
-		}
-	}()
 
 	dialer := memconn.Dialer("/dev/shm/ivshmem", ringSize, 0)
 	ctx := context.Background()
 	conn, err := grpc.DialContext(ctx, "memconn", grpc.WithContextDialer(dialer), grpc.WithInsecure())
-	if err != nil {
-		require.NoError(t, err)
-	}
-	//defer conn.Close()
+	require.NoError(t, err)
 
 	client := NewVSTBridgeClient(conn)
 	fmt.Println("will call echo")
 	resp, err := client.Echo(ctx, &Echo_Request{Str: "test"})
+	fmt.Println("called echo")
 	if err != nil {
 		require.NoError(t, err)
 	}
@@ -51,7 +36,11 @@ func TestEcho(t *testing.T) {
 		t.Fatal("echo reply must be 'test'")
 	}
 
-	log.Println("TEST DONE")
+	ret := conn.Close()
+	fmt.Println("close ret", ret)
+	require.NoError(t, ret)
 
-	wg.Wait()
+	time.Sleep(100 * time.Millisecond) // really wait for close
+
+	log.Println("TEST DONE")
 }
