@@ -3,29 +3,47 @@ package memconn
 // #include "membuf.h"
 import (
 	"fmt"
+	"os"
 	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 )
 
 func TestMemconn(t *testing.T) {
-	sizes := []int{4, 8, 16, 32, 64, 128, 256}
+	sizes := []int{4, 8, 16, 32, 42, 64, 128, 138, 256, 420, 512, 1024, 2048, 4096}
+
+	var logger *zap.Logger
+	if os.Getenv("DEBUG") == "true" {
+		conf := zap.NewDevelopmentConfig()
+		if len(os.Getenv("LOGFILE")) > 0 {
+			conf.OutputPaths = []string{os.Getenv("LOGFILE")}
+		}
+		var err error
+		logger, err = conf.Build()
+		require.NoError(t, err)
+	} else {
+		logger = zap.NewNop()
+	}
+	defer logger.Sync() // flushes buffer, if any
+
+	tLog := logger.Named("test")
+
 	for _, ringSize := range sizes {
-		t.Log("ringSize: ", ringSize)
+		tLog.Debug("new test group", zap.Int("ringSize", ringSize))
 
-		clientConn, serverConn, close := testingConnPair(t, "/dev/shm/ivshmem", ringSize, 0)
+		clientConn, serverConn, close := testingConnPair(t, "/dev/shm/ivshmem", ringSize, 0, logger)
 
-		t.Log("starting writes")
-
-		for i := 0; i < 5; i++ {
+		for i := 0; i < 50; i++ {
+			tLog.Debug("new test", zap.Int("i", i), zap.Int("ringSize", ringSize))
 			wg := sync.WaitGroup{}
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				testConnWrite(t, serverConn, clientConn, fmt.Sprint("Hello conn 1-", i, ringSize))
+				testConnWrite(t, serverConn, clientConn, fmt.Sprint("Hello conn 1-", i, ringSize), logger.Named("test"))
 			}()
-			testConnWrite(t, clientConn, serverConn, fmt.Sprint("Hello conn 2-", i, ringSize))
+			testConnWrite(t, clientConn, serverConn, fmt.Sprint("Hello conn 2-", i, ringSize), logger.Named("test"))
 			wg.Wait()
 		}
 
@@ -52,7 +70,6 @@ func TestWriteLen(t *testing.T) {
 	require.Panics(t, func() { _ = writeLen(0, 21, 8) })
 	require.Panics(t, func() { _ = writeLen(0, 0, 0) })
 	require.Panics(t, func() { _ = writeLen(0, 0, 1) })
-	require.Panics(t, func() { _ = writeLen(0, 0, 21) })
 }
 
 func TestReadLen(t *testing.T) {
@@ -74,5 +91,4 @@ func TestReadLen(t *testing.T) {
 	require.Panics(t, func() { _ = readLen(0, 21, 8) })
 	require.Panics(t, func() { _ = readLen(0, 0, 0) })
 	require.Panics(t, func() { _ = readLen(0, 0, 1) })
-	require.Panics(t, func() { _ = readLen(0, 0, 21) })
 }

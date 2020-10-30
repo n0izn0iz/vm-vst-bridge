@@ -7,9 +7,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 )
 
-func testConnWrite(t *testing.T, in net.Conn, out net.Conn, testStr string) {
+func testConnWrite(t *testing.T, in net.Conn, out net.Conn, testStr string, logger *zap.Logger) {
 	t.Helper()
 
 	ch := make(chan []byte)
@@ -17,9 +18,9 @@ func testConnWrite(t *testing.T, in net.Conn, out net.Conn, testStr string) {
 
 	go func() {
 		buf := make([]byte, len(testStr))
-		t.Log("waiting on read")
+		logger.Debug("waiting on read")
 		n, err := io.ReadFull(out, buf)
-		t.Log("read done")
+		logger.Debug("read done")
 		require.NoError(t, err)
 		require.Equal(t, n, len(testStr))
 		ch <- buf
@@ -33,10 +34,10 @@ func testConnWrite(t *testing.T, in net.Conn, out net.Conn, testStr string) {
 	require.Equal(t, testStr, string(buf))
 }
 
-func testingConnPair(t *testing.T, path string, ringSize, offset int) (net.Conn, net.Conn, func()) {
+func testingConnPair(t *testing.T, path string, ringSize, offset int, logger *zap.Logger) (net.Conn, net.Conn, func()) {
 	t.Helper()
 
-	l := Listen(path, ringSize, offset)
+	l := Listen(path, ringSize, offset, logger.Named("server"))
 
 	ch := make(chan net.Conn)
 	defer close(ch)
@@ -48,7 +49,7 @@ func testingConnPair(t *testing.T, path string, ringSize, offset int) (net.Conn,
 		ch <- serverConn
 	}()
 
-	dial := Dialer(path, ringSize, offset)
+	dial := Dialer(path, ringSize, offset, logger.Named("client"))
 
 	ctx := context.TODO()
 

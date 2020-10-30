@@ -34,13 +34,16 @@ func main() {
 
 	flag.Parse()
 
-	lis := memconn.Listen(shmemPath, ringSize, offset)
+	logger, err := zap.NewDevelopment()
+	if err != nil {
+		panic(err)
+	}
+	defer logger.Sync() // flushes buffer, if any
+
+	lis := memconn.Listen(shmemPath, ringSize, offset, logger)
 	opts := []grpc_zap.Option{
 		grpc_zap.WithLevels(grpc_zap.DefaultCodeToLevel),
 	}
-	logger, _ := zap.NewDevelopment()
-	defer logger.Sync() // flushes buffer, if any
-	logger.Info("wtf")
 	s := grpc.NewServer(grpc_middleware.WithUnaryServerChain(
 		//unaryInterceptor,
 		grpc_ctxtags.UnaryServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)),
@@ -49,7 +52,7 @@ func main() {
 		grpc_ctxtags.StreamServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)),
 		grpc_zap.StreamServerInterceptor(logger, opts...),
 	))
-	RegisterVSTBridgeServer(s, &server{})
+	RegisterVSTBridgeServer(s, &server{logger: logger.Named("server")})
 	if err := s.Serve(lis); err != nil {
 		panic(err)
 	}

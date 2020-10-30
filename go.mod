@@ -3,6 +3,7 @@ module github.com/n0izn0iz/vm-vst-bridge-host
 go 1.15
 
 require (
+	github.com/go-errors/errors v1.1.1
 	github.com/golang/protobuf v1.4.3
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.2
 	github.com/stretchr/testify v1.6.1
