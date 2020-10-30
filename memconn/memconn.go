@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"os"
 	"sync"
 	"time"
 
@@ -46,6 +47,12 @@ func Connect(membuf *C.membuf, ringSize int, offset int, invert bool, logger *za
 		writerIndex = 0
 	}
 
+	if os.Getenv("DEBUG_MEMCONN") == "true" {
+		logger = logger.Named("conn")
+	} else {
+		logger = zap.NewNop()
+	}
+
 	return &Conn{
 		size:         C.size_t(ringSize / 2),
 		membuf:       membuf,
@@ -53,7 +60,7 @@ func Connect(membuf *C.membuf, ringSize int, offset int, invert bool, logger *za
 		writerOffset: writerOffset,
 		readerIndex:  readerIndex,
 		writerIndex:  writerIndex,
-		logger:       logger.Named("conn"),
+		logger:       logger,
 		closed:       false,
 		closeLock:    &sync.Mutex{},
 	}

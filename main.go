@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"flag"
 	"fmt"
 	"math/rand"
+	"os"
 	"time"
 
 	"github.com/grpc-ecosystem/go-grpc-middleware"
@@ -40,22 +42,43 @@ func main() {
 	}
 	defer logger.Sync() // flushes buffer, if any
 
-	lis := memconn.Listen(shmemPath, ringSize, offset, logger)
-	opts := []grpc_zap.Option{
-		grpc_zap.WithLevels(grpc_zap.DefaultCodeToLevel),
-	}
-	s := grpc.NewServer(grpc_middleware.WithUnaryServerChain(
-		//unaryInterceptor,
-		grpc_ctxtags.UnaryServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)),
-		grpc_zap.UnaryServerInterceptor(logger, opts...),
-	), grpc_middleware.WithStreamServerChain(
-		grpc_ctxtags.StreamServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)),
-		grpc_zap.StreamServerInterceptor(logger, opts...),
-	))
-	RegisterVSTBridgeServer(s, &server{logger: logger.Named("server")})
-	if err := s.Serve(lis); err != nil {
-		panic(err)
-	}
+	if client {
+		dialer := memconn.Dialer(shmemPath, ringSize, offset, logger)
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+		conn, err := grpc.DialContext(ctx, "memconn", grpc.WithContextDialer(dialer), grpc.WithInsecure())
+		if err != nil {
+			panic(err)
+		}
+		defer conn.Close()
+		client := NewVSTBridgeClient(conn)
 
-	fmt.Println("server done")
+		reader := bufio.NewReader(os.Stdin)
+		for {
+			text, _ := reader.ReadString('\n')
+			resp, err := client.Echo(ctx, &Echo_Request{Str: text})
+			logger.Debug("response", zap.String("str", resp.GetStr()), zap.Error(err))
+		}
+
+		fmt.Println("client done")
+	} else {
+		lis := memconn.Listen(shmemPath, ringSize, offset, logger)
+		opts := []grpc_zap.Option{
+			grpc_zap.WithLevels(grpc_zap.DefaultCodeToLevel),
+		}
+		s := grpc.NewServer(grpc_middleware.WithUnaryServerChain(
+			//unaryInterceptor,
+			grpc_ctxtags.UnaryServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)),
+			grpc_zap.UnaryServerInterceptor(logger, opts...),
+		), grpc_middleware.WithStreamServerChain(
+			grpc_ctxtags.StreamServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)),
+			grpc_zap.StreamServerInterceptor(logger, opts...),
+		))
+		RegisterVSTBridgeServer(s, &server{logger: logger.Named("server")})
+		if err := s.Serve(lis); err != nil {
+			panic(err)
+		}
+
+		fmt.Println("server done")
+	}
 }
