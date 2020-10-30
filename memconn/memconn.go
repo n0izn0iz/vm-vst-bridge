@@ -138,12 +138,9 @@ func (c *Conn) Read(buf []byte) (int, error) {
 		return 0, nil
 	}
 	for {
-		c.closeLock.Lock()
 		if c.closed {
-			c.closeLock.Unlock()
 			return 0, io.ErrClosedPipe
 		}
-		c.closeLock.Unlock()
 		toRead = readLen(c.membuf.writeIndices[c.readerIndex], index, c.size)
 		if toRead > 0 {
 			break
@@ -151,7 +148,7 @@ func (c *Conn) Read(buf []byte) (int, error) {
 		if !c.membuf.connected[c.readerIndex] {
 			return 0, io.EOF
 		}
-		time.Sleep(10 * time.Millisecond)
+		time.Sleep(memTiming)
 	}
 
 	if toRead > C.uint64_t(len(buf)) {
@@ -183,12 +180,9 @@ func (c *Conn) Write(data []byte) (int, error) {
 		currentIndex := (index + C.uint64_t(i)) % c.size
 		var canWrite C.uint64_t
 		for {
-			c.closeLock.Lock()
 			if c.closed {
-				c.closeLock.Unlock()
 				return int(i), io.ErrClosedPipe
 			}
-			c.closeLock.Unlock()
 			if !c.membuf.connected[c.writerIndex] {
 				return int(i), io.ErrClosedPipe
 			}
@@ -196,7 +190,7 @@ func (c *Conn) Write(data []byte) (int, error) {
 			if canWrite > 0 {
 				break
 			}
-			time.Sleep(10 * time.Millisecond)
+			time.Sleep(memTiming)
 		}
 		ocw := canWrite
 		if canWrite > C.uint64_t(len(data)-i) {

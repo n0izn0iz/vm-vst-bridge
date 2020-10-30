@@ -2,9 +2,11 @@ package memconn
 
 // #include "membuf.h"
 import (
+	"context"
 	"fmt"
+	"io"
+	"net"
 	"os"
-	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -12,7 +14,7 @@ import (
 )
 
 func TestMemconn(t *testing.T) {
-	sizes := []int{4, 8, 16, 32, 42, 64, 128, 138, 256, 420, 512, 1024, 2048, 4096}
+	sizes := []int{4, 8, 16, 32, 42, 64, 128, 138, 256, 420, 512, 1024, 2048, 4096, 1024 * 1024}
 
 	var logger *zap.Logger
 	if os.Getenv("DEBUG") == "true" {
@@ -33,21 +35,20 @@ func TestMemconn(t *testing.T) {
 	for _, ringSize := range sizes {
 		tLog.Debug("new test group", zap.Int("ringSize", ringSize))
 
-		clientConn, serverConn, close := testingConnPair(t, "/dev/shm/ivshmem", ringSize, 0, logger)
+		clientConn, serverConn, closeConn := testingConnPair(t, "/dev/shm/ivshmem", ringSize, 0, logger)
 
-		for i := 0; i < 50; i++ {
-			tLog.Debug("new test", zap.Int("i", i), zap.Int("ringSize", ringSize))
-			wg := sync.WaitGroup{}
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-				testConnWrite(t, serverConn, clientConn, fmt.Sprint("Hello conn 1-", i, ringSize), logger.Named("test"))
-			}()
-			testConnWrite(t, clientConn, serverConn, fmt.Sprint("Hello conn 2-", i, ringSize), logger.Named("test"))
-			wg.Wait()
-		}
+		runs := 50000
 
-		close()
+		done := make(chan struct{})
+		go func() {
+			testConnWrite(t, runs, serverConn, clientConn, fmt.Sprint("Hello conn 1-", ringSize), logger.Named("server"))
+			close(done)
+		}()
+
+		testConnWrite(t, runs, clientConn, serverConn, fmt.Sprint("Hello conn 2-", ringSize), logger.Named("client"))
+
+		<-done
+		closeConn()
 	}
 }
 
@@ -91,4 +92,70 @@ func TestReadLen(t *testing.T) {
 	require.Panics(t, func() { _ = readLen(0, 21, 8) })
 	require.Panics(t, func() { _ = readLen(0, 0, 0) })
 	require.Panics(t, func() { _ = readLen(0, 0, 1) })
+}
+
+func testConnWrite(t *testing.T, runs int, in net.Conn, out net.Conn, testStr string, logger *zap.Logger) {
+	t.Helper()
+
+	done := make(chan struct{})
+
+	go func() {
+		for i := 0; i < runs; i++ {
+			testStr := fmt.Sprint(testStr, "-", i)
+			logger.Debug("new test", zap.Int("i", i), zap.String("testStr", testStr))
+			buf := make([]byte, len(testStr))
+			logger.Debug("waiting on read")
+			n, err := io.ReadFull(out, buf)
+			logger.Debug("read done")
+			require.NoError(t, err)
+			require.Equal(t, n, len(testStr))
+			require.Equal(t, testStr, string(buf))
+		}
+
+		close(done)
+	}()
+
+	for i := 0; i < runs; i++ {
+		testStr := fmt.Sprint(testStr, "-", i)
+		n, err := in.Write([]byte(testStr))
+		require.NoError(t, err)
+		require.Equal(t, len(testStr), n)
+	}
+
+	<-done
+}
+
+func testingConnPair(t *testing.T, path string, ringSize, offset int, logger *zap.Logger) (net.Conn, net.Conn, func()) {
+	t.Helper()
+
+	l := Listen(path, ringSize, offset, logger.Named("server"))
+
+	ch := make(chan net.Conn)
+	defer close(ch)
+
+	go func() {
+		serverConn, err := l.Accept()
+		require.NotNil(t, serverConn)
+		require.NoError(t, err)
+		ch <- serverConn
+	}()
+
+	dial := Dialer(path, ringSize, offset, logger.Named("client"))
+
+	ctx, cancel := context.WithCancel(context.Background())
+
+	clientConn, err := dial(ctx, "memconn")
+	require.NotNil(t, clientConn)
+	require.NoError(t, err)
+
+	serverConn := <-ch
+
+	close := func() {
+		require.NoError(t, serverConn.Close())
+		require.NoError(t, clientConn.Close())
+		require.NoError(t, l.Close())
+		cancel()
+	}
+
+	return clientConn, serverConn, close
 }

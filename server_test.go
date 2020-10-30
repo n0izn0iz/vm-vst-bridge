@@ -20,7 +20,7 @@ import (
 )
 
 func TestEcho(t *testing.T) {
-	sizes := []int{ /*4, */ 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096}
+	sizes := []int{4, 8, 16, 32, 42, 64, 128, 138, 256, 420, 512, 1024, 2048, 4096, 1024 * 1024}
 	const shmemPath = "/dev/shm/ivshmem"
 
 	var logger *zap.Logger
@@ -68,7 +68,7 @@ func TestEcho(t *testing.T) {
 
 		dialer := memconn.Dialer(shmemPath, ringSize, 0, logger.Named("client"))
 
-		for i := 0; i < 10; i++ {
+		for i := 0; i < 100; i++ {
 			tLog.Debug("test", zap.Int("index", i))
 			ctx, cancel := context.WithCancel(context.Background())
 			conn, err := grpc.DialContext(ctx, "memconn", grpc.WithContextDialer(dialer), grpc.WithInsecure())
@@ -77,7 +77,7 @@ func TestEcho(t *testing.T) {
 
 			testStr := fmt.Sprint("test ", i)
 
-			for j := 0; j < 10; j++ {
+			for j := 0; j < 100; j++ {
 				tLog.Debug("calling echo", zap.Int("i", i), zap.Int("j", j))
 				resp, err := client.Echo(ctx, &Echo_Request{Str: testStr})
 				tLog.Debug("called echo", zap.Int("i", i), zap.Int("j", j), zap.Error(err))

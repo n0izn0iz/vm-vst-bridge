@@ -71,23 +71,17 @@ var ErrClosed = fmt.Errorf("closed")
 func (l *Listener) Accept() (net.Conn, error) {
 	l.logger.Debug("Listener.Accept", zap.Stack("trace"))
 
-	l.closeLock.Lock()
 	if l.closed {
-		l.closeLock.Unlock()
 		return nil, ErrClosed
 	}
-	l.closeLock.Unlock()
 
 	if l.membuf.connected[0] || l.membuf.connected[1] {
 		l.logger.Debug("handshake: wait for end of previous conn")
 		for l.membuf.connected[0] || l.membuf.connected[1] {
-			time.Sleep(10 * time.Millisecond)
-			l.closeLock.Lock()
+			time.Sleep(memTiming)
 			if l.closed {
-				l.closeLock.Unlock()
 				return nil, ErrClosed
 			}
-			l.closeLock.Unlock()
 		}
 	}
 
@@ -97,13 +91,10 @@ func (l *Listener) Accept() (net.Conn, error) {
 	mem := l.membuf
 	mem.challenge = challenge
 	for mem.answer != answer {
-		time.Sleep(10 * time.Millisecond)
-		l.closeLock.Lock()
+		time.Sleep(memTiming)
 		if l.closed {
-			l.closeLock.Unlock()
 			return nil, ErrClosed
 		}
-		l.closeLock.Unlock()
 	}
 	l.logger.Debug("handshake: got challenge answer", zap.Uint("challenge", uint(challenge)))
 	mem.readIndices[0] = mem.writeIndices[0]
@@ -121,7 +112,7 @@ func Dialer(shmemPath string, ringSize int, offset int, logger *zap.Logger) func
 		if mem.connected[0] || mem.connected[1] {
 			logger.Debug("handshake: wait for end of previous conn")
 			for mem.connected[0] || mem.connected[1] {
-				time.Sleep(10 * time.Millisecond)
+				time.Sleep(memTiming)
 				select {
 				case <-ctx.Done():
 					return nil, ErrClosed
@@ -136,7 +127,7 @@ func Dialer(shmemPath string, ringSize int, offset int, logger *zap.Logger) func
 			challenge = mem.challenge
 			answer = challenge + 42
 			mem.answer = answer
-			time.Sleep(10 * time.Millisecond)
+			time.Sleep(memTiming)
 			select {
 			case <-ctx.Done():
 				return nil, ErrClosed
