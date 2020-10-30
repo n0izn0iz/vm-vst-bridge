@@ -10,17 +10,17 @@
 // � 2006, Steinberg Media Technologies, All Rights Reserved
 //-------------------------------------------------------------------------------------------------------
 
-#ifndef __again__
-#define __again__
+#ifndef __plugin__
+#define __plugin__
 
 #include "audioeffectx.h"
 
 //-------------------------------------------------------------------------------------------------------
-class AGain : public AudioEffectX
+class Plugin : public AudioEffectX
 {
 public:
-	AGain (audioMasterCallback audioMaster);
-	~AGain ();
+	Plugin (audioMasterCallback audioMaster);
+	~Plugin ();
 
 	// Processing
 	virtual void processReplacing (float** inputs, float** outputs, VstInt32 sampleFrames);
