@@ -1,4 +1,4 @@
-module github.com/n0izn0iz/vm-vst-bridge-host
+module github.com/n0izn0iz/vm-vst-bridge
 
 go 1.15
 

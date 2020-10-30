@@ -16,7 +16,7 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
-	"github.com/n0izn0iz/vm-vst-bridge-host/memconn"
+	"github.com/n0izn0iz/vm-vst-bridge/memconn"
 )
 
 func TestEcho(t *testing.T) {

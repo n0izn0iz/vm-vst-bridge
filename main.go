@@ -10,7 +10,7 @@ import (
 	"github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
-	"github.com/n0izn0iz/vm-vst-bridge-host/memconn"
+	"github.com/n0izn0iz/vm-vst-bridge/memconn"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
