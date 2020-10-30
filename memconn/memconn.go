@@ -1,61 +1,6 @@
 package memconn
 
-/*
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <string.h>
-
-#include <sys/stat.h>
-#include <sys/mman.h>
-
-#include "membuf.h"
-
-void readBytes(membuf* mb, void* dst, uint64_t dstOffset, uint64_t start, size_t len) {
-	memcpy(((char*)dst) + dstOffset, (&mb->data) + start, len);
-}
-
-void writeBytes(membuf* mb, void* src, uint64_t srcOffset, uint64_t start, size_t len) {
-	memcpy((&mb->data) + start, ((char*)src) + srcOffset, len);
-}
-
-membuf* initShmem(_GoString_ _shmem_device_file, size_t *size, int* err)
-{
-	*err = 0;
-
-	size_t len = _GoStringLen(_shmem_device_file);
-	char shmem_device_file[len + 1];
-	memcpy(shmem_device_file, _GoStringPtr(_shmem_device_file), len);
-	shmem_device_file[len] = '\0';
-
-  struct stat st;
-  if (stat(shmem_device_file, &st) < 0)  {
-    fprintf(stderr, "Failed to stat the shared memory file: %s\n", shmem_device_file);
-		*err = 1;
-    return NULL;
-  }
-	*size = st.st_size;
-
-  int shmFD = open(shmem_device_file, O_RDWR);
-  if (shmFD < 0) {
-    fprintf(stderr, "Failed to open the shared memory file: %s\n", shmem_device_file);
-		*err = 2;
-    return NULL;
-  }
-
-  membuf* mb = mmap(0, st.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, shmFD, 0);
-  if (mb == MAP_FAILED) {
-    fprintf(stderr, "Failed to map the shared memory file: %s\n", shmem_device_file);
-    close(shmFD);
-		*err = 3;
-    return NULL;
-  }
-
-	return mb;
-}
-*/
+// #include "membuf.h"
 import "C"
 import (
 	"fmt"
@@ -158,11 +103,11 @@ func (c *Conn) Read(buf []byte) (int, error) {
 	newIndex := (index + toRead) % c.size
 	rs := c.readerOffset + index
 	if newIndex > index {
-		C.readBytes(c.membuf, rbuf, 0, rs, toRead)
+		readBytes(c.membuf, rbuf, 0, rs, toRead)
 	} else {
 		fLen := c.size - index
-		C.readBytes(c.membuf, rbuf, 0, rs, fLen)
-		C.readBytes(c.membuf, rbuf, fLen, c.readerOffset, newIndex)
+		readBytes(c.membuf, rbuf, 0, rs, fLen)
+		readBytes(c.membuf, rbuf, fLen, c.readerOffset, newIndex)
 	}
 	c.membuf.readIndices[c.readerIndex] = newIndex
 	rbytes := C.GoBytes(rbuf, C.int(toRead))
@@ -201,11 +146,11 @@ func (c *Conn) Write(data []byte) (int, error) {
 		c.logger.Debug("will write", zap.String("data", string(data[i:])), zap.Uint64("writeStart", uint64(ws)), zap.Uint64("couldWrite", uint64(ocw)), zap.Uint64("canWrite", uint64(canWrite)), zap.Uint64("newIndex", uint64(newIndex)))
 		cbuf := C.CBytes(data[i:])
 		if newIndex > currentIndex {
-			C.writeBytes(c.membuf, cbuf, 0, ws, canWrite)
+			writeBytes(c.membuf, cbuf, 0, ws, canWrite)
 		} else {
 			fLen := c.size - currentIndex
-			C.writeBytes(c.membuf, cbuf, 0, ws, fLen)
-			C.writeBytes(c.membuf, cbuf, fLen, c.writerOffset, newIndex)
+			writeBytes(c.membuf, cbuf, 0, ws, fLen)
+			writeBytes(c.membuf, cbuf, fLen, c.writerOffset, newIndex)
 		}
 		c.membuf.writeIndices[c.writerIndex] = newIndex
 		C.free(cbuf)

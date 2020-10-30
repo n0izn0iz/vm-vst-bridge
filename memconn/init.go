@@ -26,31 +26,6 @@ type Listener struct {
 
 var _ net.Listener = (*Listener)(nil)
 
-func newMembuf(shmemPath string, ringSize int, offset int, logger *zap.Logger) (*C.membuf, C.size_t) {
-	if len(shmemPath) <= 0 || offset < 0 || ringSize < 4 || ringSize%2 != 0 {
-		panic(fmt.Sprint("invalid parameter(s): shmemPath: ", shmemPath, ", ringSize: ", ringSize, ", offset: ", offset))
-	}
-
-	var ret C.int
-	var memSize C.size_t
-	mem := C.initShmem(shmemPath, &memSize, &ret)
-	if ret != 0 {
-		panic(fmt.Sprint("failed to init shmem: ret=", ret))
-	}
-	logger.Debug("ivshmem:",
-		zap.Int("memSizeMiB", int(memSize/1024/1024)),
-		zap.Int("offsetB", offset),
-		zap.Int("ringSizeB", ringSize),
-	)
-
-	// FIXME: compute real maximum
-	if C.size_t(ringSize) > (memSize/2)-C.size_t(offset) {
-		panic("ring too big for ivshmem")
-	}
-
-	return mem, memSize
-}
-
 func Listen(shmemPath string, ringSize int, offset int, logger *zap.Logger) *Listener {
 	mem, _ := newMembuf(shmemPath, ringSize, offset, logger)
 	mem.connected[0] = false
