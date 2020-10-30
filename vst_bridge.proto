@@ -7,6 +7,30 @@ package vstbridge;
 // Interface exported by the server.
 service VSTBridge {
   rpc Echo(Echo.Request) returns (Echo.Reply) {}
+
+  // Processing
+  rpc ProcessReplacing(ProcessReplacing.Request) returns(ProcessReplacing.Reply) {}
+  rpc ProcessDoubleReplacing(ProcessDoubleReplacing.Request) returns(ProcessDoubleReplacing.Reply) {}
+}
+
+message ProcessReplacing {
+  message Request {
+    repeated FloatArray inputs = 1;
+    int32 sampleFrames = 2;
+  }
+  message Reply {
+    repeated FloatArray outputs = 1;
+  }
+}
+
+message ProcessDoubleReplacing {
+  message Request {
+    repeated DoubleArray inputs = 1;
+    int32 sampleFrames = 5;
+  }
+  message Reply {
+    repeated DoubleArray outputs = 1;
+  }
 }
 
 message Echo {
@@ -16,4 +40,12 @@ message Echo {
   message Reply {
     string str = 1;
   }
+}
+
+message FloatArray {
+  repeated float data = 1;
+}
+
+message DoubleArray {
+  repeated double data = 1;
 }

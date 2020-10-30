@@ -18,6 +18,9 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type VSTBridgeClient interface {
 	Echo(ctx context.Context, in *Echo_Request, opts ...grpc.CallOption) (*Echo_Reply, error)
+	// Processing
+	ProcessReplacing(ctx context.Context, in *ProcessReplacing_Request, opts ...grpc.CallOption) (*ProcessReplacing_Reply, error)
+	ProcessDoubleReplacing(ctx context.Context, in *ProcessDoubleReplacing_Request, opts ...grpc.CallOption) (*ProcessDoubleReplacing_Reply, error)
 }
 
 type vSTBridgeClient struct {
@@ -37,11 +40,32 @@ func (c *vSTBridgeClient) Echo(ctx context.Context, in *Echo_Request, opts ...gr
 	return out, nil
 }
 
+func (c *vSTBridgeClient) ProcessReplacing(ctx context.Context, in *ProcessReplacing_Request, opts ...grpc.CallOption) (*ProcessReplacing_Reply, error) {
+	out := new(ProcessReplacing_Reply)
+	err := c.cc.Invoke(ctx, "/vstbridge.VSTBridge/ProcessReplacing", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *vSTBridgeClient) ProcessDoubleReplacing(ctx context.Context, in *ProcessDoubleReplacing_Request, opts ...grpc.CallOption) (*ProcessDoubleReplacing_Reply, error) {
+	out := new(ProcessDoubleReplacing_Reply)
+	err := c.cc.Invoke(ctx, "/vstbridge.VSTBridge/ProcessDoubleReplacing", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // VSTBridgeServer is the server API for VSTBridge service.
 // All implementations must embed UnimplementedVSTBridgeServer
 // for forward compatibility
 type VSTBridgeServer interface {
 	Echo(context.Context, *Echo_Request) (*Echo_Reply, error)
+	// Processing
+	ProcessReplacing(context.Context, *ProcessReplacing_Request) (*ProcessReplacing_Reply, error)
+	ProcessDoubleReplacing(context.Context, *ProcessDoubleReplacing_Request) (*ProcessDoubleReplacing_Reply, error)
 	mustEmbedUnimplementedVSTBridgeServer()
 }
 
@@ -51,6 +75,12 @@ type UnimplementedVSTBridgeServer struct {
 
 func (UnimplementedVSTBridgeServer) Echo(context.Context, *Echo_Request) (*Echo_Reply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Echo not implemented")
+}
+func (UnimplementedVSTBridgeServer) ProcessReplacing(context.Context, *ProcessReplacing_Request) (*ProcessReplacing_Reply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ProcessReplacing not implemented")
+}
+func (UnimplementedVSTBridgeServer) ProcessDoubleReplacing(context.Context, *ProcessDoubleReplacing_Request) (*ProcessDoubleReplacing_Reply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ProcessDoubleReplacing not implemented")
 }
 func (UnimplementedVSTBridgeServer) mustEmbedUnimplementedVSTBridgeServer() {}
 
@@ -83,6 +113,42 @@ func _VSTBridge_Echo_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _VSTBridge_ProcessReplacing_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ProcessReplacing_Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VSTBridgeServer).ProcessReplacing(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/vstbridge.VSTBridge/ProcessReplacing",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VSTBridgeServer).ProcessReplacing(ctx, req.(*ProcessReplacing_Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _VSTBridge_ProcessDoubleReplacing_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ProcessDoubleReplacing_Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VSTBridgeServer).ProcessDoubleReplacing(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/vstbridge.VSTBridge/ProcessDoubleReplacing",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VSTBridgeServer).ProcessDoubleReplacing(ctx, req.(*ProcessDoubleReplacing_Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _VSTBridge_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "vstbridge.VSTBridge",
 	HandlerType: (*VSTBridgeServer)(nil),
@@ -90,6 +156,14 @@ var _VSTBridge_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Echo",
 			Handler:    _VSTBridge_Echo_Handler,
+		},
+		{
+			MethodName: "ProcessReplacing",
+			Handler:    _VSTBridge_ProcessReplacing_Handler,
+		},
+		{
+			MethodName: "ProcessDoubleReplacing",
+			Handler:    _VSTBridge_ProcessDoubleReplacing_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -25,6 +25,82 @@ const (
 // of the legacy proto package is being used.
 const _ = proto.ProtoPackageIsVersion4
 
+type ProcessReplacing struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *ProcessReplacing) Reset() {
+	*x = ProcessReplacing{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_vst_bridge_proto_msgTypes[0]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ProcessReplacing) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProcessReplacing) ProtoMessage() {}
+
+func (x *ProcessReplacing) ProtoReflect() protoreflect.Message {
+	mi := &file_vst_bridge_proto_msgTypes[0]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProcessReplacing.ProtoReflect.Descriptor instead.
+func (*ProcessReplacing) Descriptor() ([]byte, []int) {
+	return file_vst_bridge_proto_rawDescGZIP(), []int{0}
+}
+
+type ProcessDoubleReplacing struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *ProcessDoubleReplacing) Reset() {
+	*x = ProcessDoubleReplacing{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_vst_bridge_proto_msgTypes[1]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ProcessDoubleReplacing) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProcessDoubleReplacing) ProtoMessage() {}
+
+func (x *ProcessDoubleReplacing) ProtoReflect() protoreflect.Message {
+	mi := &file_vst_bridge_proto_msgTypes[1]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProcessDoubleReplacing.ProtoReflect.Descriptor instead.
+func (*ProcessDoubleReplacing) Descriptor() ([]byte, []int) {
+	return file_vst_bridge_proto_rawDescGZIP(), []int{1}
+}
+
 type Echo struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -34,7 +110,7 @@ type Echo struct {
 func (x *Echo) Reset() {
 	*x = Echo{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_vst_bridge_proto_msgTypes[0]
+		mi := &file_vst_bridge_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -47,7 +123,7 @@ func (x *Echo) String() string {
 func (*Echo) ProtoMessage() {}
 
 func (x *Echo) ProtoReflect() protoreflect.Message {
-	mi := &file_vst_bridge_proto_msgTypes[0]
+	mi := &file_vst_bridge_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -60,7 +136,305 @@ func (x *Echo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Echo.ProtoReflect.Descriptor instead.
 func (*Echo) Descriptor() ([]byte, []int) {
-	return file_vst_bridge_proto_rawDescGZIP(), []int{0}
+	return file_vst_bridge_proto_rawDescGZIP(), []int{2}
+}
+
+type FloatArray struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Data []float32 `protobuf:"fixed32,1,rep,packed,name=data,proto3" json:"data,omitempty"`
+}
+
+func (x *FloatArray) Reset() {
+	*x = FloatArray{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_vst_bridge_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *FloatArray) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FloatArray) ProtoMessage() {}
+
+func (x *FloatArray) ProtoReflect() protoreflect.Message {
+	mi := &file_vst_bridge_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FloatArray.ProtoReflect.Descriptor instead.
+func (*FloatArray) Descriptor() ([]byte, []int) {
+	return file_vst_bridge_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *FloatArray) GetData() []float32 {
+	if x != nil {
+		return x.Data
+	}
+	return nil
+}
+
+type DoubleArray struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Data []float64 `protobuf:"fixed64,1,rep,packed,name=data,proto3" json:"data,omitempty"`
+}
+
+func (x *DoubleArray) Reset() {
+	*x = DoubleArray{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_vst_bridge_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *DoubleArray) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DoubleArray) ProtoMessage() {}
+
+func (x *DoubleArray) ProtoReflect() protoreflect.Message {
+	mi := &file_vst_bridge_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DoubleArray.ProtoReflect.Descriptor instead.
+func (*DoubleArray) Descriptor() ([]byte, []int) {
+	return file_vst_bridge_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *DoubleArray) GetData() []float64 {
+	if x != nil {
+		return x.Data
+	}
+	return nil
+}
+
+type ProcessReplacing_Request struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Inputs       []*FloatArray `protobuf:"bytes,1,rep,name=inputs,proto3" json:"inputs,omitempty"`
+	SampleFrames int32         `protobuf:"varint,2,opt,name=sampleFrames,proto3" json:"sampleFrames,omitempty"`
+}
+
+func (x *ProcessReplacing_Request) Reset() {
+	*x = ProcessReplacing_Request{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_vst_bridge_proto_msgTypes[5]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ProcessReplacing_Request) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProcessReplacing_Request) ProtoMessage() {}
+
+func (x *ProcessReplacing_Request) ProtoReflect() protoreflect.Message {
+	mi := &file_vst_bridge_proto_msgTypes[5]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProcessReplacing_Request.ProtoReflect.Descriptor instead.
+func (*ProcessReplacing_Request) Descriptor() ([]byte, []int) {
+	return file_vst_bridge_proto_rawDescGZIP(), []int{0, 0}
+}
+
+func (x *ProcessReplacing_Request) GetInputs() []*FloatArray {
+	if x != nil {
+		return x.Inputs
+	}
+	return nil
+}
+
+func (x *ProcessReplacing_Request) GetSampleFrames() int32 {
+	if x != nil {
+		return x.SampleFrames
+	}
+	return 0
+}
+
+type ProcessReplacing_Reply struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Outputs []*FloatArray `protobuf:"bytes,1,rep,name=outputs,proto3" json:"outputs,omitempty"`
+}
+
+func (x *ProcessReplacing_Reply) Reset() {
+	*x = ProcessReplacing_Reply{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_vst_bridge_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ProcessReplacing_Reply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProcessReplacing_Reply) ProtoMessage() {}
+
+func (x *ProcessReplacing_Reply) ProtoReflect() protoreflect.Message {
+	mi := &file_vst_bridge_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProcessReplacing_Reply.ProtoReflect.Descriptor instead.
+func (*ProcessReplacing_Reply) Descriptor() ([]byte, []int) {
+	return file_vst_bridge_proto_rawDescGZIP(), []int{0, 1}
+}
+
+func (x *ProcessReplacing_Reply) GetOutputs() []*FloatArray {
+	if x != nil {
+		return x.Outputs
+	}
+	return nil
+}
+
+type ProcessDoubleReplacing_Request struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Inputs       []*DoubleArray `protobuf:"bytes,1,rep,name=inputs,proto3" json:"inputs,omitempty"`
+	SampleFrames int32          `protobuf:"varint,5,opt,name=sampleFrames,proto3" json:"sampleFrames,omitempty"`
+}
+
+func (x *ProcessDoubleReplacing_Request) Reset() {
+	*x = ProcessDoubleReplacing_Request{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_vst_bridge_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ProcessDoubleReplacing_Request) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProcessDoubleReplacing_Request) ProtoMessage() {}
+
+func (x *ProcessDoubleReplacing_Request) ProtoReflect() protoreflect.Message {
+	mi := &file_vst_bridge_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProcessDoubleReplacing_Request.ProtoReflect.Descriptor instead.
+func (*ProcessDoubleReplacing_Request) Descriptor() ([]byte, []int) {
+	return file_vst_bridge_proto_rawDescGZIP(), []int{1, 0}
+}
+
+func (x *ProcessDoubleReplacing_Request) GetInputs() []*DoubleArray {
+	if x != nil {
+		return x.Inputs
+	}
+	return nil
+}
+
+func (x *ProcessDoubleReplacing_Request) GetSampleFrames() int32 {
+	if x != nil {
+		return x.SampleFrames
+	}
+	return 0
+}
+
+type ProcessDoubleReplacing_Reply struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Outputs []*DoubleArray `protobuf:"bytes,1,rep,name=outputs,proto3" json:"outputs,omitempty"`
+}
+
+func (x *ProcessDoubleReplacing_Reply) Reset() {
+	*x = ProcessDoubleReplacing_Reply{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_vst_bridge_proto_msgTypes[8]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ProcessDoubleReplacing_Reply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProcessDoubleReplacing_Reply) ProtoMessage() {}
+
+func (x *ProcessDoubleReplacing_Reply) ProtoReflect() protoreflect.Message {
+	mi := &file_vst_bridge_proto_msgTypes[8]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProcessDoubleReplacing_Reply.ProtoReflect.Descriptor instead.
+func (*ProcessDoubleReplacing_Reply) Descriptor() ([]byte, []int) {
+	return file_vst_bridge_proto_rawDescGZIP(), []int{1, 1}
+}
+
+func (x *ProcessDoubleReplacing_Reply) GetOutputs() []*DoubleArray {
+	if x != nil {
+		return x.Outputs
+	}
+	return nil
 }
 
 type Echo_Request struct {
@@ -74,7 +448,7 @@ type Echo_Request struct {
 func (x *Echo_Request) Reset() {
 	*x = Echo_Request{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_vst_bridge_proto_msgTypes[1]
+		mi := &file_vst_bridge_proto_msgTypes[9]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -87,7 +461,7 @@ func (x *Echo_Request) String() string {
 func (*Echo_Request) ProtoMessage() {}
 
 func (x *Echo_Request) ProtoReflect() protoreflect.Message {
-	mi := &file_vst_bridge_proto_msgTypes[1]
+	mi := &file_vst_bridge_proto_msgTypes[9]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -100,7 +474,7 @@ func (x *Echo_Request) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Echo_Request.ProtoReflect.Descriptor instead.
 func (*Echo_Request) Descriptor() ([]byte, []int) {
-	return file_vst_bridge_proto_rawDescGZIP(), []int{0, 0}
+	return file_vst_bridge_proto_rawDescGZIP(), []int{2, 0}
 }
 
 func (x *Echo_Request) GetStr() string {
@@ -121,7 +495,7 @@ type Echo_Reply struct {
 func (x *Echo_Reply) Reset() {
 	*x = Echo_Reply{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_vst_bridge_proto_msgTypes[2]
+		mi := &file_vst_bridge_proto_msgTypes[10]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -134,7 +508,7 @@ func (x *Echo_Reply) String() string {
 func (*Echo_Reply) ProtoMessage() {}
 
 func (x *Echo_Reply) ProtoReflect() protoreflect.Message {
-	mi := &file_vst_bridge_proto_msgTypes[2]
+	mi := &file_vst_bridge_proto_msgTypes[10]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -147,7 +521,7 @@ func (x *Echo_Reply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Echo_Reply.ProtoReflect.Descriptor instead.
 func (*Echo_Reply) Descriptor() ([]byte, []int) {
-	return file_vst_bridge_proto_rawDescGZIP(), []int{0, 1}
+	return file_vst_bridge_proto_rawDescGZIP(), []int{2, 1}
 }
 
 func (x *Echo_Reply) GetStr() string {
@@ -161,17 +535,56 @@ var File_vst_bridge_proto protoreflect.FileDescriptor
 
 var file_vst_bridge_proto_rawDesc = []byte{
 	0x0a, 0x10, 0x76, 0x73, 0x74, 0x5f, 0x62, 0x72, 0x69, 0x64, 0x67, 0x65, 0x2e, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x12, 0x09, 0x76, 0x73, 0x74, 0x62, 0x72, 0x69, 0x64, 0x67, 0x65, 0x22, 0x3e, 0x0a,
-	0x04, 0x45, 0x63, 0x68, 0x6f, 0x1a, 0x1b, 0x0a, 0x07, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
-	0x12, 0x10, 0x0a, 0x03, 0x73, 0x74, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x73,
-	0x74, 0x72, 0x1a, 0x19, 0x0a, 0x05, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x10, 0x0a, 0x03, 0x73,
-	0x74, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x73, 0x74, 0x72, 0x32, 0x45, 0x0a,
-	0x09, 0x56, 0x53, 0x54, 0x42, 0x72, 0x69, 0x64, 0x67, 0x65, 0x12, 0x38, 0x0a, 0x04, 0x45, 0x63,
-	0x68, 0x6f, 0x12, 0x17, 0x2e, 0x76, 0x73, 0x74, 0x62, 0x72, 0x69, 0x64, 0x67, 0x65, 0x2e, 0x45,
-	0x63, 0x68, 0x6f, 0x2e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x15, 0x2e, 0x76, 0x73,
-	0x74, 0x62, 0x72, 0x69, 0x64, 0x67, 0x65, 0x2e, 0x45, 0x63, 0x68, 0x6f, 0x2e, 0x52, 0x65, 0x70,
-	0x6c, 0x79, 0x22, 0x00, 0x42, 0x08, 0x5a, 0x06, 0x2e, 0x3b, 0x6d, 0x61, 0x69, 0x6e, 0x62, 0x06,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x74, 0x6f, 0x12, 0x09, 0x76, 0x73, 0x74, 0x62, 0x72, 0x69, 0x64, 0x67, 0x65, 0x22, 0xaa, 0x01,
+	0x0a, 0x10, 0x50, 0x72, 0x6f, 0x63, 0x65, 0x73, 0x73, 0x52, 0x65, 0x70, 0x6c, 0x61, 0x63, 0x69,
+	0x6e, 0x67, 0x1a, 0x5c, 0x0a, 0x07, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x2d, 0x0a,
+	0x06, 0x69, 0x6e, 0x70, 0x75, 0x74, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x15, 0x2e,
+	0x76, 0x73, 0x74, 0x62, 0x72, 0x69, 0x64, 0x67, 0x65, 0x2e, 0x46, 0x6c, 0x6f, 0x61, 0x74, 0x41,
+	0x72, 0x72, 0x61, 0x79, 0x52, 0x06, 0x69, 0x6e, 0x70, 0x75, 0x74, 0x73, 0x12, 0x22, 0x0a, 0x0c,
+	0x73, 0x61, 0x6d, 0x70, 0x6c, 0x65, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x73, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x05, 0x52, 0x0c, 0x73, 0x61, 0x6d, 0x70, 0x6c, 0x65, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x73,
+	0x1a, 0x38, 0x0a, 0x05, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x2f, 0x0a, 0x07, 0x6f, 0x75, 0x74,
+	0x70, 0x75, 0x74, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x15, 0x2e, 0x76, 0x73, 0x74,
+	0x62, 0x72, 0x69, 0x64, 0x67, 0x65, 0x2e, 0x46, 0x6c, 0x6f, 0x61, 0x74, 0x41, 0x72, 0x72, 0x61,
+	0x79, 0x52, 0x07, 0x6f, 0x75, 0x74, 0x70, 0x75, 0x74, 0x73, 0x22, 0xb2, 0x01, 0x0a, 0x16, 0x50,
+	0x72, 0x6f, 0x63, 0x65, 0x73, 0x73, 0x44, 0x6f, 0x75, 0x62, 0x6c, 0x65, 0x52, 0x65, 0x70, 0x6c,
+	0x61, 0x63, 0x69, 0x6e, 0x67, 0x1a, 0x5d, 0x0a, 0x07, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x12, 0x2e, 0x0a, 0x06, 0x69, 0x6e, 0x70, 0x75, 0x74, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b,
+	0x32, 0x16, 0x2e, 0x76, 0x73, 0x74, 0x62, 0x72, 0x69, 0x64, 0x67, 0x65, 0x2e, 0x44, 0x6f, 0x75,
+	0x62, 0x6c, 0x65, 0x41, 0x72, 0x72, 0x61, 0x79, 0x52, 0x06, 0x69, 0x6e, 0x70, 0x75, 0x74, 0x73,
+	0x12, 0x22, 0x0a, 0x0c, 0x73, 0x61, 0x6d, 0x70, 0x6c, 0x65, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x73,
+	0x18, 0x05, 0x20, 0x01, 0x28, 0x05, 0x52, 0x0c, 0x73, 0x61, 0x6d, 0x70, 0x6c, 0x65, 0x46, 0x72,
+	0x61, 0x6d, 0x65, 0x73, 0x1a, 0x39, 0x0a, 0x05, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x30, 0x0a,
+	0x07, 0x6f, 0x75, 0x74, 0x70, 0x75, 0x74, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x16,
+	0x2e, 0x76, 0x73, 0x74, 0x62, 0x72, 0x69, 0x64, 0x67, 0x65, 0x2e, 0x44, 0x6f, 0x75, 0x62, 0x6c,
+	0x65, 0x41, 0x72, 0x72, 0x61, 0x79, 0x52, 0x07, 0x6f, 0x75, 0x74, 0x70, 0x75, 0x74, 0x73, 0x22,
+	0x3e, 0x0a, 0x04, 0x45, 0x63, 0x68, 0x6f, 0x1a, 0x1b, 0x0a, 0x07, 0x52, 0x65, 0x71, 0x75, 0x65,
+	0x73, 0x74, 0x12, 0x10, 0x0a, 0x03, 0x73, 0x74, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x03, 0x73, 0x74, 0x72, 0x1a, 0x19, 0x0a, 0x05, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x10, 0x0a,
+	0x03, 0x73, 0x74, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x73, 0x74, 0x72, 0x22,
+	0x20, 0x0a, 0x0a, 0x46, 0x6c, 0x6f, 0x61, 0x74, 0x41, 0x72, 0x72, 0x61, 0x79, 0x12, 0x12, 0x0a,
+	0x04, 0x64, 0x61, 0x74, 0x61, 0x18, 0x01, 0x20, 0x03, 0x28, 0x02, 0x52, 0x04, 0x64, 0x61, 0x74,
+	0x61, 0x22, 0x21, 0x0a, 0x0b, 0x44, 0x6f, 0x75, 0x62, 0x6c, 0x65, 0x41, 0x72, 0x72, 0x61, 0x79,
+	0x12, 0x12, 0x0a, 0x04, 0x64, 0x61, 0x74, 0x61, 0x18, 0x01, 0x20, 0x03, 0x28, 0x01, 0x52, 0x04,
+	0x64, 0x61, 0x74, 0x61, 0x32, 0x93, 0x02, 0x0a, 0x09, 0x56, 0x53, 0x54, 0x42, 0x72, 0x69, 0x64,
+	0x67, 0x65, 0x12, 0x38, 0x0a, 0x04, 0x45, 0x63, 0x68, 0x6f, 0x12, 0x17, 0x2e, 0x76, 0x73, 0x74,
+	0x62, 0x72, 0x69, 0x64, 0x67, 0x65, 0x2e, 0x45, 0x63, 0x68, 0x6f, 0x2e, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x1a, 0x15, 0x2e, 0x76, 0x73, 0x74, 0x62, 0x72, 0x69, 0x64, 0x67, 0x65, 0x2e,
+	0x45, 0x63, 0x68, 0x6f, 0x2e, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x00, 0x12, 0x5c, 0x0a, 0x10,
+	0x50, 0x72, 0x6f, 0x63, 0x65, 0x73, 0x73, 0x52, 0x65, 0x70, 0x6c, 0x61, 0x63, 0x69, 0x6e, 0x67,
+	0x12, 0x23, 0x2e, 0x76, 0x73, 0x74, 0x62, 0x72, 0x69, 0x64, 0x67, 0x65, 0x2e, 0x50, 0x72, 0x6f,
+	0x63, 0x65, 0x73, 0x73, 0x52, 0x65, 0x70, 0x6c, 0x61, 0x63, 0x69, 0x6e, 0x67, 0x2e, 0x52, 0x65,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x21, 0x2e, 0x76, 0x73, 0x74, 0x62, 0x72, 0x69, 0x64, 0x67,
+	0x65, 0x2e, 0x50, 0x72, 0x6f, 0x63, 0x65, 0x73, 0x73, 0x52, 0x65, 0x70, 0x6c, 0x61, 0x63, 0x69,
+	0x6e, 0x67, 0x2e, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x00, 0x12, 0x6e, 0x0a, 0x16, 0x50, 0x72,
+	0x6f, 0x63, 0x65, 0x73, 0x73, 0x44, 0x6f, 0x75, 0x62, 0x6c, 0x65, 0x52, 0x65, 0x70, 0x6c, 0x61,
+	0x63, 0x69, 0x6e, 0x67, 0x12, 0x29, 0x2e, 0x76, 0x73, 0x74, 0x62, 0x72, 0x69, 0x64, 0x67, 0x65,
+	0x2e, 0x50, 0x72, 0x6f, 0x63, 0x65, 0x73, 0x73, 0x44, 0x6f, 0x75, 0x62, 0x6c, 0x65, 0x52, 0x65,
+	0x70, 0x6c, 0x61, 0x63, 0x69, 0x6e, 0x67, 0x2e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
+	0x27, 0x2e, 0x76, 0x73, 0x74, 0x62, 0x72, 0x69, 0x64, 0x67, 0x65, 0x2e, 0x50, 0x72, 0x6f, 0x63,
+	0x65, 0x73, 0x73, 0x44, 0x6f, 0x75, 0x62, 0x6c, 0x65, 0x52, 0x65, 0x70, 0x6c, 0x61, 0x63, 0x69,
+	0x6e, 0x67, 0x2e, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x00, 0x42, 0x08, 0x5a, 0x06, 0x2e, 0x3b,
+	0x6d, 0x61, 0x69, 0x6e, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -186,20 +599,36 @@ func file_vst_bridge_proto_rawDescGZIP() []byte {
 	return file_vst_bridge_proto_rawDescData
 }
 
-var file_vst_bridge_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_vst_bridge_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_vst_bridge_proto_goTypes = []interface{}{
-	(*Echo)(nil),         // 0: vstbridge.Echo
-	(*Echo_Request)(nil), // 1: vstbridge.Echo.Request
-	(*Echo_Reply)(nil),   // 2: vstbridge.Echo.Reply
+	(*ProcessReplacing)(nil),               // 0: vstbridge.ProcessReplacing
+	(*ProcessDoubleReplacing)(nil),         // 1: vstbridge.ProcessDoubleReplacing
+	(*Echo)(nil),                           // 2: vstbridge.Echo
+	(*FloatArray)(nil),                     // 3: vstbridge.FloatArray
+	(*DoubleArray)(nil),                    // 4: vstbridge.DoubleArray
+	(*ProcessReplacing_Request)(nil),       // 5: vstbridge.ProcessReplacing.Request
+	(*ProcessReplacing_Reply)(nil),         // 6: vstbridge.ProcessReplacing.Reply
+	(*ProcessDoubleReplacing_Request)(nil), // 7: vstbridge.ProcessDoubleReplacing.Request
+	(*ProcessDoubleReplacing_Reply)(nil),   // 8: vstbridge.ProcessDoubleReplacing.Reply
+	(*Echo_Request)(nil),                   // 9: vstbridge.Echo.Request
+	(*Echo_Reply)(nil),                     // 10: vstbridge.Echo.Reply
 }
 var file_vst_bridge_proto_depIdxs = []int32{
-	1, // 0: vstbridge.VSTBridge.Echo:input_type -> vstbridge.Echo.Request
-	2, // 1: vstbridge.VSTBridge.Echo:output_type -> vstbridge.Echo.Reply
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	3,  // 0: vstbridge.ProcessReplacing.Request.inputs:type_name -> vstbridge.FloatArray
+	3,  // 1: vstbridge.ProcessReplacing.Reply.outputs:type_name -> vstbridge.FloatArray
+	4,  // 2: vstbridge.ProcessDoubleReplacing.Request.inputs:type_name -> vstbridge.DoubleArray
+	4,  // 3: vstbridge.ProcessDoubleReplacing.Reply.outputs:type_name -> vstbridge.DoubleArray
+	9,  // 4: vstbridge.VSTBridge.Echo:input_type -> vstbridge.Echo.Request
+	5,  // 5: vstbridge.VSTBridge.ProcessReplacing:input_type -> vstbridge.ProcessReplacing.Request
+	7,  // 6: vstbridge.VSTBridge.ProcessDoubleReplacing:input_type -> vstbridge.ProcessDoubleReplacing.Request
+	10, // 7: vstbridge.VSTBridge.Echo:output_type -> vstbridge.Echo.Reply
+	6,  // 8: vstbridge.VSTBridge.ProcessReplacing:output_type -> vstbridge.ProcessReplacing.Reply
+	8,  // 9: vstbridge.VSTBridge.ProcessDoubleReplacing:output_type -> vstbridge.ProcessDoubleReplacing.Reply
+	7,  // [7:10] is the sub-list for method output_type
+	4,  // [4:7] is the sub-list for method input_type
+	4,  // [4:4] is the sub-list for extension type_name
+	4,  // [4:4] is the sub-list for extension extendee
+	0,  // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_vst_bridge_proto_init() }
@@ -209,7 +638,7 @@ func file_vst_bridge_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_vst_bridge_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Echo); i {
+			switch v := v.(*ProcessReplacing); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -221,7 +650,7 @@ func file_vst_bridge_proto_init() {
 			}
 		}
 		file_vst_bridge_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Echo_Request); i {
+			switch v := v.(*ProcessDoubleReplacing); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -233,6 +662,102 @@ func file_vst_bridge_proto_init() {
 			}
 		}
 		file_vst_bridge_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Echo); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_vst_bridge_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*FloatArray); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_vst_bridge_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*DoubleArray); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_vst_bridge_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ProcessReplacing_Request); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_vst_bridge_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ProcessReplacing_Reply); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_vst_bridge_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ProcessDoubleReplacing_Request); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_vst_bridge_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ProcessDoubleReplacing_Reply); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_vst_bridge_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Echo_Request); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_vst_bridge_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Echo_Reply); i {
 			case 0:
 				return &v.state
@@ -251,7 +776,7 @@ func file_vst_bridge_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_vst_bridge_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
