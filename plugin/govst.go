@@ -7,6 +7,7 @@ import "C"
 
 import (
 	"context"
+	"fmt"
 	"unsafe"
 
 	"github.com/n0izn0iz/vm-vst-bridge/memconn"
@@ -19,38 +20,73 @@ import (
 const arrayLength = 1 << 30
 
 type bridge struct {
-	c   vstbridge.VSTBridgeClient
-	l   *zap.Logger
-	ctx context.Context
+	c         vstbridge.VSTBridgeClient
+	l         *zap.Logger
+	ctx       context.Context
+	cancelCtx context.CancelFunc
+	conn      *grpc.ClientConn
 }
 
-var b *bridge
+var bridges = make(map[uintptr]*bridge)
 
 //export NewBridge
-func NewBridge() {
-	if b != nil {
-		panic("bridge already allocated")
-	}
+func NewBridge(cplug uintptr) {
 	logger, err := zap.NewDevelopment()
 	if err != nil {
-		panic(err)
+		fmt.Println("failed to init zap logger", cplug)
+		logger = zap.NewNop()
 	}
-	dialer := memconn.Dialer("/dev/shmem/ivshmem", 4096, 0, logger)
-	ctx := context.TODO()
+	logger.Debug("NewBridge", zap.Uintptr("cplug", cplug))
+
+	if bridges[cplug] != nil {
+		logger.Error("bridge already allocated", zap.Uintptr("cplug", cplug))
+		panic("bridge already allocated")
+	}
+
+	dialer := memconn.Dialer("/dev/shm/ivshmem", 1000000, 0, logger)
+
+	ctx, cancelCtx := context.WithCancel(context.Background())
 	conn, err := grpc.DialContext(ctx, "memconn", grpc.WithContextDialer(dialer), grpc.WithInsecure())
-	// TODO: close conn properly
 	if err != nil {
+		logger.Error("failed to dial", zap.Error(err))
 		panic(err)
 	}
-	b = &bridge{
-		c:   vstbridge.NewVSTBridgeClient(conn),
-		l:   logger,
-		ctx: ctx,
+
+	bridges[cplug] = &bridge{
+		c:         vstbridge.NewVSTBridgeClient(conn),
+		l:         logger,
+		ctx:       ctx,
+		cancelCtx: cancelCtx,
+		conn:      conn,
 	}
+}
+
+//export CloseBridge
+func CloseBridge(cplug uintptr) {
+	b, ok := bridges[cplug]
+	if !ok {
+		fmt.Println("warning: tried to close unallocated bridge", cplug)
+		return
+	}
+	b.l.Debug("CloseBridge", zap.Uintptr("cplug", cplug))
+
+	err := b.conn.Close()
+	if err != nil {
+		b.l.Error("failed to close conn", zap.Error(err))
+	}
+
+	b.cancelCtx()
+
+	bridges[cplug] = nil
 }
 
 //export GetParameter
-func GetParameter(index int32) float32 {
+func GetParameter(cplug uintptr, index int32) float32 {
+	b, ok := bridges[cplug]
+	if !ok {
+		return 0.5
+	}
+
 	rep, err := b.c.GetParameter(b.ctx, &vstbridge.GetParameter_Request{
 		Index: index,
 	})
@@ -62,7 +98,12 @@ func GetParameter(index int32) float32 {
 }
 
 //export SetParameter
-func SetParameter(index int32, value float32) {
+func SetParameter(cplug uintptr, index int32, value float32) {
+	b, ok := bridges[cplug]
+	if !ok {
+		return
+	}
+
 	_, err := b.c.SetParameter(b.ctx, &vstbridge.SetParameter_Request{
 		Index: index,
 		Value: value,
@@ -73,7 +114,12 @@ func SetParameter(index int32, value float32) {
 }
 
 //export ProcessReplacing
-func ProcessReplacing(inputs **float32, outputs **float32, sampleFrames int32) {
+func ProcessReplacing(cplug uintptr, inputs **float32, outputs **float32, sampleFrames int32) {
+	b, ok := bridges[cplug]
+	if !ok {
+		return
+	}
+
 	ins := (*[arrayLength]*float32)(unsafe.Pointer(inputs))
 	in1 := (*[arrayLength]C.float)(unsafe.Pointer(ins[0]))
 	in2 := (*[arrayLength]C.float)(unsafe.Pointer(ins[1]))
@@ -112,7 +158,12 @@ func ProcessReplacing(inputs **float32, outputs **float32, sampleFrames int32) {
 }
 
 //export ProcessDoubleReplacing
-func ProcessDoubleReplacing(inputs **float64, outputs **float64, sampleFrames int32) {
+func ProcessDoubleReplacing(cplug uintptr, inputs **float64, outputs **float64, sampleFrames int32) {
+	b, ok := bridges[cplug]
+	if !ok {
+		return
+	}
+
 	ins := (*[arrayLength]*float64)(unsafe.Pointer(inputs))
 	in1 := (*[arrayLength]C.double)(unsafe.Pointer(ins[0]))
 	in2 := (*[arrayLength]C.double)(unsafe.Pointer(ins[1]))
@@ -133,7 +184,7 @@ func ProcessDoubleReplacing(inputs **float64, outputs **float64, sampleFrames in
 		SampleFrames: sampleFrames,
 	})
 	if err != nil {
-		b.l.Error("ProcessReplacing", zap.Error(err))
+		b.l.Error("ProcessDoubleReplacing", zap.Error(err))
 		return
 	}
 
