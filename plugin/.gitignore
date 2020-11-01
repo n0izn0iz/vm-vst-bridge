@@ -5,8 +5,7 @@
 *.so
 *.dylib
 *~
-vstsdk2.4/
-govst.h
+bridge.h
 VST2_SDK
 
 # Test binary, build with `go test -c`

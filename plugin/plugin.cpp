@@ -1,5 +1,5 @@
 #include "plugin.h"
-#include "govst.h"
+#include "bridge.h"
 
 //-------------------------------------------------------------------------------------------------------
 Plugin::Plugin (audioMasterCallback audioMaster)
@@ -21,7 +21,6 @@ Plugin::Plugin (audioMasterCallback audioMaster)
 Plugin::~Plugin ()
 {
 	CloseBridge((GoUint64)this);
-	// nothing to do here
 }
 
 //-------------------------------------------------------------------------------------------------------
