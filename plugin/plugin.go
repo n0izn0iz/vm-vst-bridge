@@ -1,7 +1,7 @@
 package main
 
 /*
-#cgo windows CPPFLAGS: -IVST2_SDK -D__cdecl=""
+#cgo windows CPPFLAGS: -IVST2_SDK -IVST2_SDK/public.sdk/source/vst2.x -D__cdecl=""
 #cgo linux CPPFLAGS: -I/usr/include/vst36 -D__cdecl=""
 */
 import "C"

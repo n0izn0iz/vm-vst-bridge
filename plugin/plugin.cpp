@@ -1,22 +1,5 @@
-//-------------------------------------------------------------------------------------------------------
-// VST Plug-Ins SDK
-// Version 2.4		$Date: 2006/11/13 09:08:27 $
-//
-// Category     : VST 2.x SDK Samples
-// Filename     : Plugin.cpp
-// Created by   : Steinberg Media Technologies
-// Description  : Stereo plugin which applies Gain [-oo, 0dB]
-//
-// � 2006, Steinberg Media Technologies, All Rights Reserved
-//-------------------------------------------------------------------------------------------------------
-
 #include "plugin.h"
 #include "govst.h"
-
-AudioEffect* createEffectInstance (audioMasterCallback audioMaster)
-{
-	return new Plugin (audioMaster);
-}
 
 //-------------------------------------------------------------------------------------------------------
 Plugin::Plugin (audioMasterCallback audioMaster)
@@ -88,7 +71,7 @@ bool Plugin::getProductString (char* text)
 //------------------------------------------------------------------------
 bool Plugin::getVendorString (char* text)
 {
-	vst_strncpy (text, "Steinberg Media Technologies", kVstMaxVendorStrLen);
+	vst_strncpy (text, "n0iz", kVstMaxVendorStrLen);
 	return true;
 }
 
