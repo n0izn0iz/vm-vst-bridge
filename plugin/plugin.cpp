@@ -1,4 +1,5 @@
 #include "plugin.h"
+#include "editor.h"
 #include "bridge.h"
 
 //-------------------------------------------------------------------------------------------------------
@@ -13,6 +14,8 @@ Plugin::Plugin (audioMasterCallback audioMaster)
 
 	fGain = 1.f;			// default to 0 dB
 	vst_strncpy (programName, "Default-0", kVstMaxProgNameLen);	// default program name
+
+	setEditor(new Editor());
 
 	NewBridge((GoUint64)this);
 }

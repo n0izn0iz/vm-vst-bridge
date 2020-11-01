@@ -1,15 +1,3 @@
-//-------------------------------------------------------------------------------------------------------
-// VST Plug-Ins SDK
-// Version 2.4		$Date: 2006/11/13 09:08:27 $
-//
-// Category     : VST 2.x SDK Samples
-// Filename     : again.h
-// Created by   : Steinberg Media Technologies
-// Description  : Stereo plugin which applies Gain [-oo, 0dB]
-//
-// � 2006, Steinberg Media Technologies, All Rights Reserved
-//-------------------------------------------------------------------------------------------------------
-
 #ifndef __plugin__
 #define __plugin__
 
