@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/n0izn0iz/vm-vst-bridge/vstbridge;vstbridge";
+option go_package = "github.com/n0izn0iz/vm-vst-bridge/pkg/vstbridge;vstbridge";
 
 package vstbridge;
 

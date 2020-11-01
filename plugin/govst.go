@@ -11,7 +11,7 @@ import (
 	"unsafe"
 
 	"github.com/n0izn0iz/vm-vst-bridge/memconn"
-	"github.com/n0izn0iz/vm-vst-bridge/vstbridge"
+	"github.com/n0izn0iz/vm-vst-bridge/pkg/vstbridge"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
