@@ -2,6 +2,8 @@ cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMT
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
+github.com/JamesHovious/w32 v1.1.0 h1:Cghhl7dY4oawL2BvmsuxEb5cPwUw1ctPAq85VIt5qtQ=
+github.com/JamesHovious/w32 v1.1.0/go.mod h1:/Y2i/iSYfWJypxp4NnirO9/V19yV2dJvNFCdU0hyW68=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/cncf/udpa/go v0.0.0-20191209042840-269d4d468f6f/go.mod h1:M8M6+tZqaGXZJjfX53e64911xZQV5JYwmTeXPW+k8Sc=
@@ -143,6 +145,8 @@ google.golang.org/grpc v1.27.0/go.mod h1:qbnxyOmOxrQa7FizSgH+ReBfzJrCY1pSN7KXBS8
 google.golang.org/grpc v1.29.1/go.mod h1:itym6AZVZYACWQqET3MqgPpjcuV5QH3BxFS3IjizoKk=
 google.golang.org/grpc v1.33.1 h1:DGeFlSan2f+WEtCERJ4J9GJWk15TxUi8QGagfI87Xyc=
 google.golang.org/grpc v1.33.1/go.mod h1:fr5YgcSWrqhRRxogOsw7RzIpsmvOZ6IcH4kBYTpR3n0=
+google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.0.1 h1:M8spwkmx0pHrPq+uMdl22w5CvJ/Y+oAJTIs9oGoCpOE=
+google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.0.1/go.mod h1:6Kw0yEErY5E/yWrBtf03jp27GLLJujG4z/JK95pnjjw=
 google.golang.org/protobuf v0.0.0-20200109180630-ec00e32a8dfd/go.mod h1:DFci5gLYBciE7Vtevhsrf46CRTquxDuWsQurQQe4oz8=
 google.golang.org/protobuf v0.0.0-20200221191635-4d8936d0db64/go.mod h1:kwYJMbMJ01Woi6D6+Kah6886xMZcty6N08ah7+eCXa0=
 google.golang.org/protobuf v0.0.0-20200228230310-ab0ca4ff8a60/go.mod h1:cfTl7dwQJ+fmap5saPgwCLgHXTUD7jkjRqWcaiX5VyM=
@@ -162,3 +166,12 @@ gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c/go.mod h1:K4uyk7z7BCEPqu6E+C
 honnef.co/go/tools v0.0.0-20190102054323-c2f93a96b099/go.mod h1:rf3lG4BRIbNafJWhAfAdb/ePZxsR/4RtNHQocxwk9r4=
 honnef.co/go/tools v0.0.0-20190523083050-ea95bdfd59fc/go.mod h1:rf3lG4BRIbNafJWhAfAdb/ePZxsR/4RtNHQocxwk9r4=
 honnef.co/go/tools v0.0.1-2019.2.3/go.mod h1:a3bituU0lyd329TUQxRnasdCoJDkEUEAqEt0JzvZhAg=
+pipelined.dev/audio v0.4.0 h1:f1UGhY8IVliS77W7S0V07M7iiHtucdJ56OSIsSTpMws=
+pipelined.dev/audio/vst2 v0.8.0 h1:Jh4n9e9QzL1hTAAdaUhkHfvu5XXBGJoKcWxA9wwSxow=
+pipelined.dev/audio/vst2 v0.8.0/go.mod h1:tk6cjKEKTBtSepjJt+knKN/B6xhLcdmDfja3FVblv2U=
+pipelined.dev/audio/vst2 v0.8.1-0.20201026191710-b6d1191410a4 h1:MXakzQNeqbsxtEmtTFNmd7KMPcaSQQdaHy1FCt0OgpQ=
+pipelined.dev/audio/vst2 v0.8.1-0.20201026191710-b6d1191410a4/go.mod h1:tk6cjKEKTBtSepjJt+knKN/B6xhLcdmDfja3FVblv2U=
+pipelined.dev/pipe v0.9.0 h1:lZK1z2j7MT4p49/YG5ixdwm9SZR3ob6WRJRoyWOPS0o=
+pipelined.dev/pipe v0.9.0/go.mod h1:GExMBEAGrfgMAXM3RRwZepzL+VSrAfq2iUeBMbOkTzw=
+pipelined.dev/signal v0.9.0 h1:1tmBYsBQCP4TXYy+wCbv6LH3aiRrigqcx4i7dwSAd9U=
+pipelined.dev/signal v0.9.0/go.mod h1:wi0YlA20+rinS9o+7IMZHH3/YsO3jkahHNLSCCfaEA0=

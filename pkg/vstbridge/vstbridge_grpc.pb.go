@@ -19,6 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 type VSTBridgeClient interface {
 	Echo(ctx context.Context, in *Echo_Request, opts ...grpc.CallOption) (*Echo_Reply, error)
 	// Processing
+	SetSampleRate(ctx context.Context, in *SetSampleRate_Request, opts ...grpc.CallOption) (*SetSampleRate_Reply, error)
 	ProcessReplacing(ctx context.Context, in *ProcessReplacing_Request, opts ...grpc.CallOption) (*ProcessReplacing_Reply, error)
 	ProcessDoubleReplacing(ctx context.Context, in *ProcessDoubleReplacing_Request, opts ...grpc.CallOption) (*ProcessDoubleReplacing_Reply, error)
 	// Parameters
@@ -37,6 +38,15 @@ func NewVSTBridgeClient(cc grpc.ClientConnInterface) VSTBridgeClient {
 func (c *vSTBridgeClient) Echo(ctx context.Context, in *Echo_Request, opts ...grpc.CallOption) (*Echo_Reply, error) {
 	out := new(Echo_Reply)
 	err := c.cc.Invoke(ctx, "/vstbridge.VSTBridge/Echo", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *vSTBridgeClient) SetSampleRate(ctx context.Context, in *SetSampleRate_Request, opts ...grpc.CallOption) (*SetSampleRate_Reply, error) {
+	out := new(SetSampleRate_Reply)
+	err := c.cc.Invoke(ctx, "/vstbridge.VSTBridge/SetSampleRate", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -85,6 +95,7 @@ func (c *vSTBridgeClient) SetParameter(ctx context.Context, in *SetParameter_Req
 type VSTBridgeServer interface {
 	Echo(context.Context, *Echo_Request) (*Echo_Reply, error)
 	// Processing
+	SetSampleRate(context.Context, *SetSampleRate_Request) (*SetSampleRate_Reply, error)
 	ProcessReplacing(context.Context, *ProcessReplacing_Request) (*ProcessReplacing_Reply, error)
 	ProcessDoubleReplacing(context.Context, *ProcessDoubleReplacing_Request) (*ProcessDoubleReplacing_Reply, error)
 	// Parameters
@@ -99,6 +110,9 @@ type UnimplementedVSTBridgeServer struct {
 
 func (UnimplementedVSTBridgeServer) Echo(context.Context, *Echo_Request) (*Echo_Reply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Echo not implemented")
+}
+func (UnimplementedVSTBridgeServer) SetSampleRate(context.Context, *SetSampleRate_Request) (*SetSampleRate_Reply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetSampleRate not implemented")
 }
 func (UnimplementedVSTBridgeServer) ProcessReplacing(context.Context, *ProcessReplacing_Request) (*ProcessReplacing_Reply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ProcessReplacing not implemented")
@@ -139,6 +153,24 @@ func _VSTBridge_Echo_Handler(srv interface{}, ctx context.Context, dec func(inte
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(VSTBridgeServer).Echo(ctx, req.(*Echo_Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _VSTBridge_SetSampleRate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetSampleRate_Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VSTBridgeServer).SetSampleRate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/vstbridge.VSTBridge/SetSampleRate",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VSTBridgeServer).SetSampleRate(ctx, req.(*SetSampleRate_Request))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -224,6 +256,10 @@ var _VSTBridge_serviceDesc = grpc.ServiceDesc{
 			Handler:    _VSTBridge_Echo_Handler,
 		},
 		{
+			MethodName: "SetSampleRate",
+			Handler:    _VSTBridge_SetSampleRate_Handler,
+		},
+		{
 			MethodName: "ProcessReplacing",
 			Handler:    _VSTBridge_ProcessReplacing_Handler,
 		},
@@ -241,5 +277,5 @@ var _VSTBridge_serviceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "vst_bridge.proto",
+	Metadata: "vstbridge.proto",
 }

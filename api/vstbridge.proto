@@ -9,6 +9,7 @@ service VSTBridge {
   rpc Echo(Echo.Request) returns (Echo.Reply) {}
 
   // Processing
+  rpc SetSampleRate(SetSampleRate.Request) returns (SetSampleRate.Reply) {}
   rpc ProcessReplacing(ProcessReplacing.Request) returns (ProcessReplacing.Reply) {}
   rpc ProcessDoubleReplacing(ProcessDoubleReplacing.Request) returns (ProcessDoubleReplacing.Reply) {}
 
@@ -17,10 +18,20 @@ service VSTBridge {
   rpc SetParameter(SetParameter.Request) returns (SetParameter.Reply) {}
 }
 
+message SetSampleRate {
+  message Request {
+    uint64 id = 1;
+    float sampleRate = 2;
+  }
+  message Reply {
+  }
+}
+
 message ProcessReplacing {
   message Request {
-    repeated FloatArray inputs = 1;
-    int32 sampleFrames = 2;
+    uint64 id = 1;
+    repeated FloatArray inputs = 2;
+    int32 sampleFrames = 3;
   }
   message Reply {
     repeated FloatArray outputs = 1;
@@ -29,8 +40,9 @@ message ProcessReplacing {
 
 message ProcessDoubleReplacing {
   message Request {
-    repeated DoubleArray inputs = 1;
-    int32 sampleFrames = 5;
+    uint64 id = 1;
+    repeated DoubleArray inputs = 2;
+    int32 sampleFrames = 3;
   }
   message Reply {
     repeated DoubleArray outputs = 1;
@@ -39,7 +51,8 @@ message ProcessDoubleReplacing {
 
 message GetParameter {
   message Request {
-    int32 index = 1;
+    uint64 id = 1;
+    int32 index = 2;
   }
   message Reply {
     float value = 1;
@@ -48,8 +61,9 @@ message GetParameter {
 
 message SetParameter {
   message Request {
-    int32 index = 1;
-    float value = 2;
+    uint64 id = 1;
+    int32 index = 2;
+    float value = 3;
   }
   message Reply {
   }

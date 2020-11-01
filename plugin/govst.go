@@ -1,7 +1,8 @@
 package main
 
 /*
-#cgo CPPFLAGS: -I/usr/include/vst36 -D__cdecl=""
+#cgo windows CPPFLAGS: -IVST2_SDK -D__cdecl=""
+#cgo linux CPPFLAGS: -I/usr/include/vst36 -D__cdecl=""
 */
 import "C"
 
@@ -10,7 +11,7 @@ import (
 	"fmt"
 	"unsafe"
 
-	"github.com/n0izn0iz/vm-vst-bridge/memconn"
+	"github.com/n0izn0iz/vm-vst-bridge/pkg/memconn"
 	"github.com/n0izn0iz/vm-vst-bridge/pkg/vstbridge"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -27,19 +28,19 @@ type bridge struct {
 	conn      *grpc.ClientConn
 }
 
-var bridges = make(map[uintptr]*bridge)
+var bridges = make(map[uint64]*bridge)
 
 //export NewBridge
-func NewBridge(cplug uintptr) {
+func NewBridge(id uint64) {
 	logger, err := zap.NewDevelopment()
 	if err != nil {
-		fmt.Println("failed to init zap logger", cplug)
+		fmt.Println("failed to init zap logger", id)
 		logger = zap.NewNop()
 	}
-	logger.Debug("NewBridge", zap.Uintptr("cplug", cplug))
+	logger.Debug("NewBridge", zap.Uint64("id", id))
 
-	if bridges[cplug] != nil {
-		logger.Error("bridge already allocated", zap.Uintptr("cplug", cplug))
+	if bridges[id] != nil {
+		logger.Error("bridge already allocated", zap.Uint64("id", id))
 		panic("bridge already allocated")
 	}
 
@@ -52,7 +53,7 @@ func NewBridge(cplug uintptr) {
 		panic(err)
 	}
 
-	bridges[cplug] = &bridge{
+	bridges[id] = &bridge{
 		c:         vstbridge.NewVSTBridgeClient(conn),
 		l:         logger,
 		ctx:       ctx,
@@ -62,13 +63,13 @@ func NewBridge(cplug uintptr) {
 }
 
 //export CloseBridge
-func CloseBridge(cplug uintptr) {
-	b, ok := bridges[cplug]
+func CloseBridge(id uint64) {
+	b, ok := bridges[id]
 	if !ok {
-		fmt.Println("warning: tried to close unallocated bridge", cplug)
+		fmt.Println("warning: tried to close unallocated bridge", id)
 		return
 	}
-	b.l.Debug("CloseBridge", zap.Uintptr("cplug", cplug))
+	b.l.Debug("CloseBridge", zap.Uint64("id", id))
 
 	err := b.conn.Close()
 	if err != nil {
@@ -77,17 +78,20 @@ func CloseBridge(cplug uintptr) {
 
 	b.cancelCtx()
 
-	bridges[cplug] = nil
+	bridges[id] = nil
 }
 
 //export GetParameter
-func GetParameter(cplug uintptr, index int32) float32 {
-	b, ok := bridges[cplug]
+func GetParameter(id uint64, index int32) float32 {
+	b, ok := bridges[id]
 	if !ok {
 		return 0.5
 	}
 
+	b.l.Debug("GetParameter", zap.Uint64("id", id), zap.Int32("index", index))
+
 	rep, err := b.c.GetParameter(b.ctx, &vstbridge.GetParameter_Request{
+		Id:    id,
 		Index: index,
 	})
 	if err != nil {
@@ -98,13 +102,16 @@ func GetParameter(cplug uintptr, index int32) float32 {
 }
 
 //export SetParameter
-func SetParameter(cplug uintptr, index int32, value float32) {
-	b, ok := bridges[cplug]
+func SetParameter(id uint64, index int32, value float32) {
+	b, ok := bridges[id]
 	if !ok {
 		return
 	}
 
+	b.l.Debug("SetSampleRate", zap.Uint64("id", id), zap.Int32("index", index), zap.Float32("value", value))
+
 	_, err := b.c.SetParameter(b.ctx, &vstbridge.SetParameter_Request{
+		Id:    id,
 		Index: index,
 		Value: value,
 	})
@@ -114,8 +121,8 @@ func SetParameter(cplug uintptr, index int32, value float32) {
 }
 
 //export ProcessReplacing
-func ProcessReplacing(cplug uintptr, inputs **float32, outputs **float32, sampleFrames int32) {
-	b, ok := bridges[cplug]
+func ProcessReplacing(id uint64, inputs **float32, outputs **float32, sampleFrames int32) {
+	b, ok := bridges[id]
 	if !ok {
 		return
 	}
@@ -133,6 +140,7 @@ func ProcessReplacing(cplug uintptr, inputs **float32, outputs **float32, sample
 	}
 
 	rep, err := b.c.ProcessReplacing(b.ctx, &vstbridge.ProcessReplacing_Request{
+		Id: id,
 		Inputs: []*vstbridge.FloatArray{
 			&vstbridge.FloatArray{Data: data1},
 			&vstbridge.FloatArray{Data: data2},
@@ -158,8 +166,8 @@ func ProcessReplacing(cplug uintptr, inputs **float32, outputs **float32, sample
 }
 
 //export ProcessDoubleReplacing
-func ProcessDoubleReplacing(cplug uintptr, inputs **float64, outputs **float64, sampleFrames int32) {
-	b, ok := bridges[cplug]
+func ProcessDoubleReplacing(id uint64, inputs **float64, outputs **float64, sampleFrames int32) {
+	b, ok := bridges[id]
 	if !ok {
 		return
 	}
@@ -177,6 +185,7 @@ func ProcessDoubleReplacing(cplug uintptr, inputs **float64, outputs **float64, 
 	}
 
 	rep, err := b.c.ProcessDoubleReplacing(b.ctx, &vstbridge.ProcessDoubleReplacing_Request{
+		Id: id,
 		Inputs: []*vstbridge.DoubleArray{
 			&vstbridge.DoubleArray{Data: data1},
 			&vstbridge.DoubleArray{Data: data2},
@@ -199,6 +208,27 @@ func ProcessDoubleReplacing(cplug uintptr, inputs **float64, outputs **float64, 
 		out1[i] = C.double(rdata1[i])
 		out2[i] = C.double(rdata2[i])
 	}
+}
+
+//export SetSampleRate
+func SetSampleRate(id uint64, sampleRate float32) bool {
+	b, ok := bridges[id]
+	if !ok {
+		return false
+	}
+
+	b.l.Debug("SetSampleRate", zap.Uint64("id", id), zap.Float32("sampleRate", sampleRate))
+
+	_, err := b.c.SetSampleRate(b.ctx, &vstbridge.SetSampleRate_Request{
+		Id:         id,
+		SampleRate: sampleRate,
+	})
+	if err != nil {
+		b.l.Error("SetSampleRate", zap.Error(err))
+		return false
+	}
+
+	return true
 }
 
 func main() {}

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # generate govst.h
 go build --buildmode=c-shared -o govst.so govst.go &&

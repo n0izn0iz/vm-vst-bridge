@@ -9,14 +9,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
-	"github.com/n0izn0iz/vm-vst-bridge/memconn"
+	"github.com/n0izn0iz/vm-vst-bridge/pkg/memconn"
+	"github.com/n0izn0iz/vm-vst-bridge/pkg/vstbridge"
 )
 
 func TestEcho(t *testing.T) {
@@ -56,7 +57,7 @@ func TestEcho(t *testing.T) {
 			grpc_ctxtags.StreamServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)),
 			grpc_zap.StreamServerInterceptor(gLog, opts...),
 		))
-		RegisterVSTBridgeServer(s, &server{logger: sLog.Named("impl")})
+		vstbridge.RegisterVSTBridgeServer(s, newServer(sLog, nil))
 		wg := sync.WaitGroup{}
 		wg.Add(1)
 		go func() {
@@ -73,13 +74,13 @@ func TestEcho(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
 			conn, err := grpc.DialContext(ctx, "memconn", grpc.WithContextDialer(dialer), grpc.WithInsecure())
 			require.NoError(t, err)
-			client := NewVSTBridgeClient(conn)
+			client := vstbridge.NewVSTBridgeClient(conn)
 
 			testStr := fmt.Sprint("test ", i)
 
 			for j := 0; j < 100; j++ {
 				tLog.Debug("calling echo", zap.Int("i", i), zap.Int("j", j))
-				resp, err := client.Echo(ctx, &Echo_Request{Str: testStr})
+				resp, err := client.Echo(ctx, &vstbridge.Echo_Request{Str: testStr})
 				tLog.Debug("called echo", zap.Int("i", i), zap.Int("j", j), zap.Error(err))
 				require.NoError(t, err)
 				require.Equal(t, testStr, resp.GetStr())

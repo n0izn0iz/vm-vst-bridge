@@ -31,13 +31,13 @@ Plugin::Plugin (audioMasterCallback audioMaster)
 	fGain = 1.f;			// default to 0 dB
 	vst_strncpy (programName, "Default-0", kVstMaxProgNameLen);	// default program name
 
-	NewBridge((GoUintptr)this);
+	NewBridge((GoUint64)this);
 }
 
 //-------------------------------------------------------------------------------------------------------
 Plugin::~Plugin ()
 {
-	CloseBridge((GoUintptr)this);
+	CloseBridge((GoUint64)this);
 	// nothing to do here
 }
 
@@ -102,18 +102,24 @@ VstInt32 Plugin::getVendorVersion ()
 
 // bridged functions below
 
-float Plugin::getParameter (VstInt32 index) {
-	return GetParameter((GoUintptr)this, index);
+float Plugin::getParameter  (VstInt32 index) {
+	return GetParameter((GoUint64)this, index);
 }
 
 void Plugin::setParameter (VstInt32 index, float value) {
-	SetParameter((GoUintptr)this, index, value);
+	SetParameter((GoUint64)this, index, value);
 }
 
 void Plugin::processReplacing (float** inputs, float** outputs, VstInt32 sampleFrames) {
-    ProcessReplacing((GoUintptr)this, (GoFloat32**)inputs, (GoFloat32**)outputs, (GoInt32)sampleFrames);
+    ProcessReplacing((GoUint64)this, (GoFloat32**)inputs, (GoFloat32**)outputs, (GoInt32)sampleFrames);
 }
 
 void Plugin::processDoubleReplacing (double** inputs, double** outputs, VstInt32 sampleFrames) {
-    ProcessDoubleReplacing((GoUintptr)this, (GoFloat64**)inputs, (GoFloat64**)outputs, (GoInt32)sampleFrames);
+    ProcessDoubleReplacing((GoUint64)this, (GoFloat64**)inputs, (GoFloat64**)outputs, (GoInt32)sampleFrames);
+}
+
+void Plugin::setSampleRate (float sampleRate) {
+	if (SetSampleRate((GoUint64)this, (GoFloat32)sampleRate)) {
+		AudioEffect::setSampleRate(sampleRate);
+	}
 }
